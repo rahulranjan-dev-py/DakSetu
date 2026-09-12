@@ -24,6 +24,9 @@ and **Rural Postal Life Insurance (RPLI)** policies in seconds – at the counte
 | Offline | `vite-plugin-pwa` (Workbox, precache-everything, auto-update) |
 | Tests | Vitest (calculation engine) |
 
+**Live app:** https://rahulranjan-dev-py.github.io/PLI---RPLI---Calculator/ (deployed from `main` by
+`.github/workflows/deploy.yml`).
+
 ## Getting started
 
 ```bash
@@ -37,6 +40,8 @@ npm run typecheck
 
 Deploy `dist/` to any static host (GitHub Pages, Netlify, an internal IIS/Apache box). The app must
 be served over HTTPS (or `localhost`) for the service worker and "Install app" prompt to work.
+When hosting under a sub-path, build with `VITE_BASE=/sub-path/ npm run build`; the GitHub Pages
+workflow does this automatically.
 
 ## Project structure
 
