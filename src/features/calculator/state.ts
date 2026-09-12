@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { PLAN_BY_ID, plansFor } from '@/domain/catalog.ts'
-import { ageFromCompleted, ageFromDOB, parseISODate } from '@/domain/age.ts'
+import { ageFromDOB, parseISODate } from '@/domain/age.ts'
 import { calculate, defaultInputFor, type CalcInput, type CalcResult } from '@/domain/engine.ts'
 import type { PaymentMode, PlanId, Product } from '@/domain/types.ts'
 import { useLocalStorage } from '@/hooks/useLocalStorage.ts'
@@ -32,7 +32,7 @@ const INITIAL: CalculatorState = {
   planId: 'pli-santosh',
   ageMode: 'age',
   dob: '',
-  completedAge: 29,
+  completedAge: 30,
   spouseCompletedAge: 27,
   parentCompletedAge: 34,
   sumAssured: 500_000,
@@ -134,9 +134,11 @@ export function useCalculator(): CalculatorController {
     return d ? ageFromDOB(d) : null
   }, [state.ageMode, state.dob])
 
-  const anb = state.ageMode === 'dob' ? (dobInfo?.nextBirthday ?? 0) : ageFromCompleted(state.completedAge).nextBirthday
-  const spouseAnb = ageFromCompleted(state.spouseCompletedAge).nextBirthday
-  const parentAnb = ageFromCompleted(state.parentCompletedAge).nextBirthday
+  // "Enter age" mode takes the value exactly as the Dak Sewa app does (age next
+  // birthday); DOB mode derives it. Duration = maturity age − this age.
+  const anb = state.ageMode === 'dob' ? (dobInfo?.nextBirthday ?? 0) : state.completedAge
+  const spouseAnb = state.spouseCompletedAge
+  const parentAnb = state.parentCompletedAge
 
   const input = useMemo<CalcInput>(
     () => ({

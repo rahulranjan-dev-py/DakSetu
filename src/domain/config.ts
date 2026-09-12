@@ -31,12 +31,26 @@ export const CONFIG: Config = {
     amountPerStep: 1,
   },
   /**
-   * Advance premium rebate: 1 % for 6 months and 2 % for 12 months on both
-   * products; RPLI additionally allows 0.5 % for 3 months' advance.
+   * Modal premiums as quoted by the Dak Sewa app (age 29, all plans, SA ₹1L/₹5L):
+   *  - PLI: quarterly ≈ monthly × 3 (−0.2 %), half-yearly = monthly × 6 − 1.45 %,
+   *    yearly = monthly × 12 − 2.95 % (percentages vary slightly with term)
+   *  - RPLI: quarterly = monthly × 3 − ₹0.15 per ₹1,000 SA, half-yearly = × 6 − ₹0.55,
+   *    yearly = × 12 − ₹2.05 per ₹1,000 SA (flat, independent of term)
    */
-  modeRebate: {
-    PLI: { monthly: 0, quarterly: 0, halfYearly: 0.01, yearly: 0.02 },
-    RPLI: { monthly: 0, quarterly: 0.005, halfYearly: 0.01, yearly: 0.02 },
+  modeAdjustment: {
+    PLI: {
+      type: 'pct',
+      discountByTerm: {
+        monthly: { 0: 0 },
+        quarterly: { 6: 0.0023, 16: 0.0013, 26: 0.0022, 29: 0, 31: 0 },
+        halfYearly: { 6: 0.0148, 21: 0.0149, 26: 0.0144, 29: 0.0141, 31: 0.0141 },
+        yearly: { 6: 0.03, 11: 0.0298, 26: 0.0294, 29: 0.0295, 31: 0.0295 },
+      },
+    },
+    RPLI: {
+      type: 'per1000',
+      deductionPer1000: { monthly: 0, quarterly: 0.15, halfYearly: 0.55, yearly: 2.05 },
+    },
   },
   modeMultiplier: { monthly: 1, quarterly: 3, halfYearly: 6, yearly: 12 },
   instalmentsPerYear: { monthly: 12, quarterly: 4, halfYearly: 2, yearly: 1 },
@@ -47,8 +61,8 @@ export const CONFIG: Config = {
     cap: 1_000,
     /** only on policies that run for at least this many years */
     minTerm: 20,
-    /** only Whole Life and Endowment contracts qualify */
-    kinds: ['WLA', 'EA', 'CWLA'],
+    /** Dak Sewa footnote: "in case of Endowment Assurance" – WLA does not qualify */
+    kinds: ['EA', 'CWLA'],
   },
   loan: {
     /** Loan is sanctioned up to ~90 % of the surrender value */

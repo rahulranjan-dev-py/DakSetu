@@ -3,6 +3,7 @@ import { PLAN_BY_ID } from './catalog.ts'
 import type { PaymentMode, PlanId, PlanSpec, Product } from './types.ts'
 import { anticipatedRate, childRate, endowmentRate, jointLifeRate, wholeLifeRate } from './rates/index.ts'
 import { WHOLE_LIFE_MATURITY_AGE } from './actuarial/assumptions.ts'
+import { interpolateByTerm } from './rates/official-anchors.ts'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Inputs
@@ -64,8 +65,13 @@ export interface PremiumBreakdown {
   /** Selected mode */
   mode: PaymentMode
   modeMultiplier: number
+  /** Discount embedded in the modal tabular premium vs monthly × instalments */
   modeRebatePct: number
-  /** Modal premium (per instalment) before GST */
+  /** Tabular premium per instalment for the selected mode (before SA rebate) */
+  tabularModal: number
+  /** SA rebate per instalment (monthly rebate × instalments) */
+  saRebateModal: number
+  /** Net modal premium (per instalment) after rebate, before GST */
   modal: number
   gstFirstYear: number
   totalFirstYear: number
@@ -188,19 +194,54 @@ export function terminalBonusFor(kind: PlanSpec['kind'], sumAssured: number, ter
   return Math.min(Math.floor(sumAssured / 10_000) * c.per10000, c.cap)
 }
 
+/**
+ * Tabular modal premium for a mode, following the official quotation rule:
+ * PLI applies a percentage discount to monthly × instalments; RPLI deducts a
+ * flat amount per ₹1,000 sum assured.
+ */
+export function tabularModalFor(
+  product: Product,
+  mode: PaymentMode,
+  term: number,
+  tabularMonthly: number,
+  sumAssured: number,
+): { tabularModal: number; discountPct: number } {
+  const n = CONFIG.modeMultiplier[mode]
+  const gross = tabularMonthly * n
+  if (mode === 'monthly') return { tabularModal: tabularMonthly, discountPct: 0 }
+  if (product === 'PLI') {
+    const d = interpolateByTerm(CONFIG.modeAdjustment.PLI.discountByTerm[mode], term)
+    return { tabularModal: r0(gross * (1 - d)), discountPct: d }
+  }
+  const deduction = r0((CONFIG.modeAdjustment.RPLI.deductionPer1000[mode] * sumAssured) / 1000)
+  return { tabularModal: Math.max(1, gross - deduction), discountPct: gross > 0 ? deduction / gross : 0 }
+}
+
+/** Effective discount of the modal premium vs monthly × instalments (for UI hints). */
+export function modeDiscount(product: Product, mode: PaymentMode, term: number, tabularMonthly = 1000, sumAssured = 500_000): number {
+  return tabularModalFor(product, mode, term, tabularMonthly, sumAssured).discountPct
+}
+
+/**
+ * Premium exactly as the Dak Sewa quotation lays it out:
+ *   tabular modal premium (monthly tabular × instalments × (1 − mode discount))
+ *   − SA rebate × instalments = net premium.
+ */
 export function buildPremium(
   ratePer1000: number,
   sumAssured: number,
   mode: PaymentMode,
   applySARebate: boolean,
   product: Product = 'PLI',
+  term = 20,
 ): PremiumBreakdown {
-  const tabularMonthly = r2((ratePer1000 * sumAssured) / 1000)
+  const tabularMonthly = r0((ratePer1000 * sumAssured) / 1000)
   const saRebate = Math.min(saRebateFor(sumAssured, applySARebate), Math.max(0, tabularMonthly - 1))
-  const netMonthly = Math.max(1, r0(tabularMonthly - saRebate))
+  const netMonthly = Math.max(1, tabularMonthly - saRebate)
   const modeMultiplier = CONFIG.modeMultiplier[mode]
-  const modeRebatePct = CONFIG.modeRebate[product][mode]
-  const modal = r0(netMonthly * modeMultiplier * (1 - modeRebatePct))
+  const { tabularModal, discountPct: modeRebatePct } = tabularModalFor(product, mode, term, tabularMonthly, sumAssured)
+  const saRebateModal = saRebate * modeMultiplier
+  const modal = Math.max(1, tabularModal - saRebateModal)
   const gstFirstYear = r2(modal * CONFIG.gst.firstYear)
   const gstRenewal = r2(modal * CONFIG.gst.renewal)
   const instalmentsPerYear = CONFIG.instalmentsPerYear[mode]
@@ -212,6 +253,8 @@ export function buildPremium(
     mode,
     modeMultiplier,
     modeRebatePct,
+    tabularModal,
+    saRebateModal,
     modal,
     gstFirstYear,
     totalFirstYear: r2(modal + gstFirstYear),
@@ -385,24 +428,32 @@ export function calculate(input: CalcInput): CalcResult {
     }
   }
 
-  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product)
+  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product, premiumTerm)
   const premiumAfterConversion =
-    conversionYear > 0 ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate, plan.product) : undefined
+    conversionYear > 0
+      ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate, plan.product, term - conversionYear)
+      : undefined
 
   // Bonus -------------------------------------------------------------------
   const bonusRate = plan.bonusRate
   const bonusRate2 = plan.bonusRateAfterConversion ?? bonusRate
   const bonusPerYear = (SA / 1000) * bonusRate
   const bonusPerYear2 = (SA / 1000) * bonusRate2
-  // Bonus fractions of 50 paise and above round up to the next rupee
-  const accruedBonusAt = (year: number) =>
-    r0(
+  // Bonus fractions of 50 paise and above round up to the next rupee.
+  // Whole life (as per the official quotation): bonus is credited for the
+  // premium-paying years only, so accrual stops at the ceasing age.
+  const bonusYears = (year: number) => Math.min(year, premiumTerm)
+  const accruedBonusAt = (year: number) => {
+    const y = bonusYears(year)
+    return r0(
       conversionYear > 0
-        ? Math.min(year, conversionYear) * bonusPerYear + Math.max(0, year - conversionYear) * bonusPerYear2
-        : year * bonusPerYear,
+        ? Math.min(y, conversionYear) * bonusPerYear + Math.max(0, y - conversionYear) * bonusPerYear2
+        : y * bonusPerYear,
     )
+  }
   const totalBonus = accruedBonusAt(term)
-  const terminalBonus = terminalBonusFor(plan.kind, SA, term)
+  // Terminal bonus is quoted as an addition (footnote) and is not part of the maturity amount
+  const terminalBonus = terminalBonusFor(conversionYear > 0 ? 'EA' : plan.kind, SA, term)
 
   // Money-back schedule -----------------------------------------------------
   const moneyBack = plan.kind === 'AEA' ? (plan.moneyBack?.[term] ?? []) : []
@@ -428,8 +479,8 @@ export function calculate(input: CalcInput): CalcResult {
       })
     }
   } else {
-    const finalAmount = SA + totalBonus + terminalBonus
-    inflowByYear.set(term, { amount: finalAmount, bonusPart: totalBonus + terminalBonus })
+    const finalAmount = SA + totalBonus
+    inflowByYear.set(term, { amount: finalAmount, bonusPart: totalBonus })
     if (conversionYear > 0) {
       milestones.push({ year: conversionYear, age: age + conversionYear, kind: 'conversion', amount: 0 })
     }
@@ -448,7 +499,7 @@ export function calculate(input: CalcInput): CalcResult {
       age: age + term,
       kind: 'maturity',
       amount: finalAmount,
-      bonusPart: totalBonus + terminalBonus,
+      bonusPart: totalBonus,
     })
   }
   milestones.sort((a, b) => a.year - b.year)

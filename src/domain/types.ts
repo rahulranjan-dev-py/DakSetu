@@ -86,10 +86,19 @@ export interface Config {
     legacy: { firstYear: number; renewal: number }
   }
   saRebate: { enabled: boolean; minSA: number; baseAmount: number; step: number; amountPerStep: number }
-  /** Advance-premium rebate by product: RPLI additionally rebates 0.5 % for 3 months' advance */
-  modeRebate: Record<Product, Record<PaymentMode, number>>
+  /**
+   * How the official quarterly / half-yearly / yearly tabular premium relates to
+   * monthly × instalments (from Dak Sewa quotations):
+   *  - PLI: a percentage discount, keyed by policy term (interpolated)
+   *  - RPLI: a flat deduction of ₹ per ₹1,000 sum assured per instalment
+   */
+  modeAdjustment: {
+    PLI: { type: 'pct'; discountByTerm: Record<PaymentMode, Record<number, number>> }
+    RPLI: { type: 'per1000'; deductionPer1000: Record<PaymentMode, number> }
+  }
   modeMultiplier: Record<PaymentMode, number>
   instalmentsPerYear: Record<PaymentMode, number>
+  /** Terminal bonus (Endowment only) – quoted as an addition, not part of the maturity amount */
   terminalBonus: { per10000: number; cap: number; minTerm: number; kinds: PlanKind[] }
   loan: { pctOfSurrender: number; interestRate: number }
   lateFee: {

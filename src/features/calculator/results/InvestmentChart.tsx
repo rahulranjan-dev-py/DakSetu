@@ -116,7 +116,7 @@ export function InvestmentChart({ result }: { result: CalcResult }) {
           accent="text-postal-700"
           segments={[
             { key: 'sa', label: t('invest.sa'), value: result.maturity.sumAssured },
-            { key: 'bonus', label: t('invest.bonus'), value: result.bonus.total + result.bonus.terminal },
+            { key: 'bonus', label: t('invest.bonus'), value: result.bonus.total },
           ]}
         />
         {result.bonus.terminal > 0 && (

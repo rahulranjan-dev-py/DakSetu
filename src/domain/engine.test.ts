@@ -23,7 +23,11 @@ describe('premium building blocks', () => {
     expect(r.premium.netMonthly).toBe(1607)
     expect(r.premium.saRebate).toBe(25)
     const y = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'yearly', applySARebate: true })
-    expect(Math.abs(y.premium.modal - 18_702)).toBeLessThan(200)
+    expect(Math.abs(y.premium.modal - 18_702)).toBeLessThan(10)
+    const q = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'quarterly', applySARebate: true })
+    expect(Math.abs(q.premium.modal - 4_810)).toBeLessThan(10)
+    const h = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'halfYearly', applySARebate: true })
+    expect(Math.abs(h.premium.modal - 9_499)).toBeLessThan(10)
     // age 27, maturity 35, SA ₹7,00,000 → ₹7,385/month
     const s = calculate({ planId: 'pli-santosh', age: 27, sumAssured: 700_000, maturityAge: 35, paymentMode: 'monthly', applySARebate: true })
     expect(s.premium.netMonthly).toBe(7385)
@@ -42,21 +46,85 @@ describe('premium building blocks', () => {
     expect(p.totalRenewal).toBe(1000)
   })
 
-  it('applies mode multipliers and advance premium rebates (PLI 1% / 2%; RPLI also 0.5% quarterly)', () => {
-    const q = buildPremium(2.0, 500_000, 'quarterly', false, 'PLI')
-    const qr = buildPremium(2.0, 500_000, 'quarterly', false, 'RPLI')
-    const h = buildPremium(2.0, 500_000, 'halfYearly', false, 'PLI')
-    const y = buildPremium(2.0, 500_000, 'yearly', false, 'PLI')
-    expect(q.modal).toBe(3000)
-    expect(qr.modal).toBe(Math.round(3000 * 0.995))
-    expect(h.modal).toBe(Math.round(6000 * 0.99))
-    expect(y.modal).toBe(Math.round(12000 * 0.98))
+  it('reproduces the Dak Sewa PLI Santosh quotation (age 29, SA ₹5L, maturity 60) in every mode', () => {
+    const base = { planId: 'pli-santosh' as const, age: 29, sumAssured: 500_000, maturityAge: 60, applySARebate: true }
+    const m = calculate({ ...base, paymentMode: 'monthly' })
+    expect(m.term).toBe(31)
+    expect(m.premium.tabularMonthly).toBe(1300)
+    expect(m.premium.saRebate).toBe(25)
+    expect(m.premium.netMonthly).toBe(1275)
+    const q = calculate({ ...base, paymentMode: 'quarterly' })
+    expect(q.premium.tabularModal).toBe(3900)
+    expect(q.premium.modal).toBe(3825)
+    const h = calculate({ ...base, paymentMode: 'halfYearly' })
+    expect(Math.abs(h.premium.tabularModal - 7690)).toBeLessThanOrEqual(2)
+    expect(Math.abs(h.premium.modal - 7540)).toBeLessThanOrEqual(2)
+    const y = calculate({ ...base, paymentMode: 'yearly' })
+    expect(Math.abs(y.premium.tabularModal - 15140)).toBeLessThanOrEqual(3)
+    expect(Math.abs(y.premium.modal - 14840)).toBeLessThanOrEqual(3)
+    // Maturity amount = SA + bonus (52 × 500 × 31); terminal bonus quoted separately
+    expect(m.bonus.total).toBe(806_000)
+    expect(m.maturity.finalPayout).toBe(1_306_000)
+    expect(m.bonus.terminal).toBe(1000)
   })
 
-  it('pays a terminal bonus of ₹20 per ₹10,000 (max ₹1,000) on 20+ year WLA/EA policies', () => {
+  it('reproduces the Dak Sewa PLI Santosh grid across maturity ages (SA ₹1L, monthly)', () => {
+    const expected: Record<number, number> = { 35: 1440, 40: 760, 45: 520, 50: 380, 55: 300, 58: 260, 60: 260 }
+    for (const [mat, prem] of Object.entries(expected)) {
+      const r = calculate({ planId: 'pli-santosh', age: 29, sumAssured: 100_000, maturityAge: +mat, paymentMode: 'monthly', applySARebate: true })
+      expect(r.premium.tabularMonthly, `maturity ${mat}`).toBe(prem)
+      expect(r.premium.netMonthly, `maturity ${mat}`).toBe(prem - 5)
+    }
+  })
+
+  it('reproduces the Dak Sewa RPLI quotations (age 29, SA ₹5L) in every mode', () => {
+    const base = { planId: 'rpli-gram-santosh' as const, age: 29, sumAssured: 500_000, maturityAge: 60, applySARebate: true }
+    const ea = calculate({ ...base, paymentMode: 'monthly' })
+    expect(ea.premium.tabularMonthly).toBe(1250)
+    expect(ea.premium.netMonthly).toBe(1225)
+    // quarterly = 1250 × 3 − ₹0.15 × 500 = 3675; half-yearly = 7500 − 275 = 7225; yearly = 15000 − 1025 = 13975
+    expect(calculate({ ...base, paymentMode: 'quarterly' }).premium.tabularModal).toBe(3675)
+    expect(calculate({ ...base, paymentMode: 'quarterly' }).premium.modal).toBe(3600)
+    expect(calculate({ ...base, paymentMode: 'halfYearly' }).premium.tabularModal).toBe(7225)
+    expect(calculate({ ...base, paymentMode: 'halfYearly' }).premium.modal).toBe(7075)
+    expect(calculate({ ...base, paymentMode: 'yearly' }).premium.tabularModal).toBe(13_975)
+    expect(calculate({ ...base, paymentMode: 'yearly' }).premium.modal).toBe(13_675)
+    // other maturity ages (monthly tabular): 35 → 7150, 40 → 3800, 45 → 2550, 50 → 1900, 55 → 1500, 58 → 1325
+    for (const [mat, prem] of Object.entries({ 35: 7150, 40: 3800, 45: 2550, 50: 1900, 55: 1500, 58: 1325 })) {
+      expect(calculate({ ...base, maturityAge: +mat, paymentMode: 'monthly' }).premium.tabularMonthly, `maturity ${mat}`).toBe(prem)
+    }
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'yearly' }).premium.modal).toBe(84_475)
+    const wla = calculate({ planId: 'rpli-gram-suraksha', age: 29, sumAssured: 500_000, ceasingAge: 55, paymentMode: 'monthly', applySARebate: true })
+    expect(wla.premium.netMonthly).toBe(1050)
+    // Whole life: bonus for the 26 premium-paying years only → maturity ₹12,80,000 at 80
+    expect(wla.bonus.total).toBe(780_000)
+    expect(wla.maturity.finalPayout).toBe(1_280_000)
+    expect(wla.bonus.terminal).toBe(0)
+    expect(calculate({ planId: 'rpli-gram-suraksha', age: 29, sumAssured: 500_000, ceasingAge: 55, paymentMode: 'yearly', applySARebate: true }).premium.modal).toBe(11_575)
+    const priya = calculate({ planId: 'rpli-gram-priya', age: 29, sumAssured: 500_000, term: 10, paymentMode: 'monthly', applySARebate: true })
+    expect(priya.premium.netMonthly).toBe(4850)
+    expect(priya.maturity.totalBenefit).toBe(725_000)
+    const sumangal = calculate({ planId: 'rpli-gram-sumangal', age: 29, sumAssured: 500_000, term: 15, paymentMode: 'monthly', applySARebate: true })
+    expect(sumangal.premium.netMonthly).toBe(3250)
+    expect(calculate({ planId: 'rpli-gram-sumangal', age: 29, sumAssured: 500_000, term: 20, paymentMode: 'monthly', applySARebate: true }).premium.netMonthly).toBe(2475)
+  })
+
+  it('reproduces the Dak Sewa PLI Suraksha and Sumangal quotations', () => {
+    const s55 = calculate({ planId: 'pli-suraksha', age: 29, sumAssured: 500_000, ceasingAge: 55, paymentMode: 'monthly', applySARebate: true })
+    expect(s55.premium.netMonthly).toBe(1075)
+    expect(s55.maturity.finalPayout).toBe(500_000 + 500 * 76 * 26)
+    const s60 = calculate({ planId: 'pli-suraksha', age: 29, sumAssured: 500_000, ceasingAge: 60, paymentMode: 'monthly', applySARebate: true })
+    expect(s60.premium.netMonthly).toBe(975)
+    const su15 = calculate({ planId: 'pli-sumangal', age: 29, sumAssured: 500_000, term: 15, paymentMode: 'monthly', applySARebate: true })
+    expect(su15.premium.netMonthly).toBe(3275)
+    const su20 = calculate({ planId: 'pli-sumangal', age: 29, sumAssured: 500_000, term: 20, paymentMode: 'monthly', applySARebate: true })
+    expect(su20.premium.netMonthly).toBe(2475)
+  })
+
+  it('quotes a terminal bonus of ₹20 per ₹10,000 (max ₹1,000) on 20+ year Endowment policies only', () => {
     expect(terminalBonusFor('EA', 100_000, 30)).toBe(200)
     expect(terminalBonusFor('EA', 500_000, 30)).toBe(1000)
-    expect(terminalBonusFor('WLA', 1_000_000, 50)).toBe(1000)
+    expect(terminalBonusFor('WLA', 1_000_000, 50)).toBe(0)
     expect(terminalBonusFor('EA', 500_000, 19)).toBe(0)
     expect(terminalBonusFor('AEA', 500_000, 20)).toBe(0)
     expect(terminalBonusFor('JOINT', 500_000, 20)).toBe(0)
@@ -82,7 +150,7 @@ describe('calculate()', () => {
     expect(r.term).toBe(30)
     expect(r.bonus.total).toBe((500_000 / 1000) * 52 * 30)
     expect(r.bonus.terminal).toBe(1000)
-    expect(r.maturity.finalPayout).toBe(500_000 + r.bonus.total + 1000)
+    expect(r.maturity.finalPayout).toBe(500_000 + r.bonus.total)
     expect(r.years).toHaveLength(30)
     expect(r.years[0].gst).toBe(0)
     expect(r.totals.gst).toBe(0)
@@ -115,7 +183,7 @@ describe('calculate()', () => {
     expect(r.loan.schedule.every((row) => row.loanValue === 0)).toBe(true)
   })
 
-  it('reproduces the research illustration: ₹10L Suraksha at 30 → ₹32,81,000 accrued at 60, full payout at 80', () => {
+  it('₹10L Suraksha at 30 → ₹32,80,000 (SA + 30 years of bonus), payable at 80 or on death', () => {
     const r = calculate({
       planId: 'pli-suraksha',
       age: 30,
@@ -126,8 +194,8 @@ describe('calculate()', () => {
     })
     expect(r.maturity.accruedValueAtPremiumEnd).toBe(1_000_000 + 1000 * 76 * 30)
     expect(r.milestones.find((m) => m.kind === 'premiumEnd')?.amount).toBe(3_280_000)
-    expect(r.bonus.terminal).toBe(1000)
-    expect(r.maturity.finalPayout).toBe(1_000_000 + 1000 * 76 * 50 + 1000)
+    expect(r.bonus.terminal).toBe(0)
+    expect(r.maturity.finalPayout).toBe(3_280_000)
   })
 
   it('caps Suvidha entry age at 50', () => {
@@ -165,7 +233,9 @@ describe('calculate()', () => {
     expect(r.premiumTerm).toBe(30)
     expect(r.term).toBe(50)
     expect(r.years[30].base).toBe(0)
-    expect(r.bonus.total).toBe(1000 * 76 * 50)
+    // bonus is credited for the premium-paying years only (official quotation basis)
+    expect(r.bonus.total).toBe(1000 * 76 * 30)
+    expect(r.years[49].lifeCover).toBe(1_000_000 + 1000 * 76 * 30)
     expect(r.milestones.some((m) => m.kind === 'premiumEnd' && m.year === 30 && m.amount === 1_000_000 + 1000 * 76 * 30)).toBe(true)
   })
 
@@ -183,6 +253,7 @@ describe('calculate()', () => {
     expect(r.issues).toEqual([])
     expect(r.term).toBe(30)
     expect(r.bonus.total).toBe(500 * 76 * 5 + 500 * 52 * 25)
+    expect(r.bonus.terminal).toBe(1000)
     expect(r.premiumAfterConversion).toBeDefined()
     expect(r.years[5].base).toBe(r.premiumAfterConversion!.modal * 12)
     expect(r.years[4].base).toBe(r.premium.modal * 12)

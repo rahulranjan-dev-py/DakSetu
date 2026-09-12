@@ -76,15 +76,15 @@ scripts/
 
 | Rule | Where |
 |---|---|
-| Age next birthday from DOB or entered age | `domain/age.ts` |
+| Age next birthday: entered directly (as in the Dak Sewa app) or derived from DOB | `domain/age.ts`, `features/calculator/state.ts` |
 | Entry age / SA limits per plan, term-specific caps (Sumangal 15y ≤ 45, 20y ≤ 40) | `domain/catalog.ts`, `engine.validate()` |
 | High-SA rebate: ₹1/month per ₹20,000 SA, scaled by mode (SA ₹5.1L → ₹25, ₹7L → ₹35) | `domain/config.ts` |
-| Mode multipliers 1×/3×/6×/12×; advance rebates 1 % / 2 % (half-yearly / yearly) on both products, plus 0.5 % quarterly on RPLI only | `domain/config.ts` |
+| Modal premiums as quoted by Dak Sewa: PLI = monthly × 3/6/12 less ≈0.2 % / 1.45 % / 2.95 %; RPLI = monthly × 3/6/12 less a flat ₹0.15 / ₹0.55 / ₹2.05 per ₹1,000 SA; then minus SA rebate × instalments | `domain/config.ts`, `engine.buildPremium()` |
 | GST: NIL since 22 Sep 2025 (CBIC Notification 16/2025); legacy 4.5 % / 2.25 % kept in config | `domain/config.ts` |
-| Terminal bonus ₹20 per ₹10,000 SA, max ₹1,000, on WLA/EA policies of 20+ years | `engine.terminalBonusFor()` |
+| Terminal bonus ₹20 per ₹10,000 SA, max ₹1,000, on Endowment policies of 20+ years, quoted as an addition to the maturity amount | `engine.terminalBonusFor()` |
 | Simple reversionary bonus = SA/1000 × rate × term (split at conversion for Suvidha) | `engine.ts` |
 | Money-back schedules 20/20/20/40 (15y & 20y) and 20/20/60 (Gram Priya) | `catalog.ts` |
-| Whole-life maturity at 80, premium ceasing at 55/58/60; accrued value shown at premium-ceasing age | `actuarial/assumptions.ts`, `engine.ts` |
+| Whole-life: premium ceasing at 55/58/60, bonus credited for the premium-paying years, SA + bonus paid at 80 or earlier death (official quotation basis) | `engine.ts` |
 | Suvidha / Gram Suvidha entry age 19–50; money-back plans have no loan; children policies have no loan or surrender; PLI Bal Jeevan min SA ₹10,000 | `domain/catalog.ts` |
 | Non-medical limits: PLI ₹2 lakh any age / ₹5 lakh up to 40; RPLI ₹1 lakh up to 35; money-back always medical | `engine.nonMedicalLimit()` |
 | Loan after 3 yrs (EA/AEA/joint/child) or 4 yrs (WLA/CWLA), ≈ 90 % of surrender value | `engine.ts` |
