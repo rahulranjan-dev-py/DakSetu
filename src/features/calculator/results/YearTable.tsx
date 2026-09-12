@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { CalcResult } from '@/domain/engine.ts'
 import { formatINR } from '@/domain/format.ts'
 import { useI18n } from '@/i18n'
+import { CONFIG } from '@/domain/config.ts'
 import { cn } from '@/lib/utils'
 
 export function YearTable({ result, compact = true }: { result: CalcResult; compact?: boolean }) {
   const { t } = useI18n()
   const [open, setOpen] = useState(!compact)
   const rows = open ? result.years : result.years.slice(0, 5)
+  const showGst = CONFIG.gst.firstYear > 0 || CONFIG.gst.renewal > 0
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
@@ -30,7 +32,7 @@ export function YearTable({ result, compact = true }: { result: CalcResult; comp
               <th className="px-3 py-1.5 text-left">{t('table.year')}</th>
               <th className="px-2 py-1.5 text-left">{t('table.age')}</th>
               <th className="px-2 py-1.5 text-right">{t('table.premium')}</th>
-              <th className="px-2 py-1.5 text-right">{t('table.gst')}</th>
+              {showGst && <th className="px-2 py-1.5 text-right">{t('table.gst')}</th>}
               <th className="px-2 py-1.5 text-right">{t('table.total')}</th>
               <th className="px-2 py-1.5 text-right">{t('table.cumulative')}</th>
               <th className="px-2 py-1.5 text-right">{t('table.benefit')}</th>
@@ -43,7 +45,7 @@ export function YearTable({ result, compact = true }: { result: CalcResult; comp
                 <td className="px-3 py-1.5 font-semibold text-slate-700">{r.year}</td>
                 <td className="px-2 py-1.5 text-slate-500">{r.age}</td>
                 <td className="px-2 py-1.5 text-right">{r.base ? formatINR(r.base) : '—'}</td>
-                <td className="px-2 py-1.5 text-right text-slate-500">{r.gst ? formatINR(r.gst, { decimals: true }) : '—'}</td>
+                {showGst && <td className="px-2 py-1.5 text-right text-slate-500">{r.gst ? formatINR(r.gst, { decimals: true }) : '—'}</td>}
                 <td className="px-2 py-1.5 text-right font-semibold">{r.total ? formatINR(r.total, { decimals: true }) : '—'}</td>
                 <td className="px-2 py-1.5 text-right text-slate-500">{formatINR(r.cumulative)}</td>
                 <td className="px-2 py-1.5 text-right font-bold text-postal-700">{r.inflow ? formatINR(r.inflow) : '—'}</td>

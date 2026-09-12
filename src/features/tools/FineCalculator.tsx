@@ -104,12 +104,22 @@ export function FineCalculator() {
             <span>{fine.lapsed ? t('fine.lapsed', { n: fine.lapseAfterMonths }) : t('fine.lapseIn', { n: fine.monthsToLapse })}</span>
           </div>
           <StatRow label={t('fine.monthsOverdue')} value={months} />
-          <StatRow label={t('fine.feePerMonth')} value={formatINR(fine.feePerInstalmentPerMonth)} />
           <StatRow label={t('fine.arrears')} value={formatINR(fine.arrears)} />
-          <StatRow label={t('fine.gst')} value={formatINR(fine.gstOnArrears, { decimals: true })} />
-          <StatRow label={t('fine.totalFee')} value={formatINR(fine.totalFee)} />
+          {fine.gstOnArrears > 0 && <StatRow label={t('fine.gst')} value={formatINR(fine.gstOnArrears, { decimals: true })} />}
+          {fine.lapsed ? (
+            <StatRow
+              label={t('fine.revivalInterest', { pct: fine.revivalInterestRate * 100 })}
+              value={formatINR(fine.revivalInterest, { decimals: true })}
+            />
+          ) : (
+            <>
+              <StatRow label={t('fine.feePerMonth')} value={formatINR(fine.feePerInstalmentPerMonth)} />
+              <StatRow label={t('fine.totalFee')} value={formatINR(fine.totalFee)} />
+            </>
+          )}
           <div className="my-2 border-t border-dashed" />
           <StatRow label={t('fine.total')} value={formatINR(fine.totalPayable, { decimals: true })} emphasis />
+          {fine.lapsed && <p className="mt-2 text-[11px] text-slate-500">{t('fine.revivalNote')}</p>}
         </CardContent>
       </Card>
     </div>

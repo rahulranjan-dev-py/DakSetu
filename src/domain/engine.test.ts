@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildPremium, calculate, defaultInputFor, irr, saRebateFor } from './engine.ts'
+import { buildPremium, calculate, defaultInputFor, irr, saRebateFor, terminalBonusFor } from './engine.ts'
 import { PLAN_BY_ID, PLANS } from './catalog.ts'
 import { CONFIG } from './config.ts'
 import { calculateFine } from './fine.ts'
@@ -7,29 +7,43 @@ import { checkEligibility } from './eligibility.ts'
 import { ageFromDOB } from './age.ts'
 
 describe('premium building blocks', () => {
-  it('applies the high sum assured rebate per ₹20,000 above threshold', () => {
-    expect(saRebateFor(100_000, true)).toBe(0)
-    expect(saRebateFor(500_000, true)).toBe(20)
-    expect(saRebateFor(5_000_000, true)).toBe(245)
+  it('applies the high sum assured rebate: ₹1 from ₹40,000 plus ₹1 per further ₹20,000', () => {
+    expect(saRebateFor(30_000, true)).toBe(0)
+    expect(saRebateFor(40_000, true)).toBe(1)
+    expect(saRebateFor(100_000, true)).toBe(4)
+    expect(saRebateFor(500_000, true)).toBe(24)
+    expect(saRebateFor(5_000_000, true)).toBe(249)
     expect(saRebateFor(5_000_000, false)).toBe(0)
   })
 
-  it('computes GST at 4.5% for year 1 and 2.25% for renewals', () => {
+  it('charges NIL GST on premiums (exempt since 22 Sep 2025)', () => {
+    expect(CONFIG.gst.firstYear).toBe(0)
+    expect(CONFIG.gst.renewal).toBe(0)
+    expect(CONFIG.gst.legacy).toEqual({ firstYear: 0.045, renewal: 0.0225 })
     const p = buildPremium(2.0, 500_000, 'monthly', false)
     expect(p.netMonthly).toBe(1000)
-    expect(p.gstFirstYear).toBeCloseTo(45)
-    expect(p.gstRenewal).toBeCloseTo(22.5)
-    expect(p.totalFirstYear).toBeCloseTo(1045)
-    expect(p.totalRenewal).toBeCloseTo(1022.5)
+    expect(p.gstFirstYear).toBe(0)
+    expect(p.totalFirstYear).toBe(1000)
+    expect(p.totalRenewal).toBe(1000)
   })
 
-  it('applies mode multipliers and advance premium rebates', () => {
+  it('applies mode multipliers and advance premium rebates (0.5% / 1% / 2%)', () => {
     const q = buildPremium(2.0, 500_000, 'quarterly', false)
     const h = buildPremium(2.0, 500_000, 'halfYearly', false)
     const y = buildPremium(2.0, 500_000, 'yearly', false)
-    expect(q.modal).toBe(3000)
-    expect(h.modal).toBe(Math.round(6000 * (1 - CONFIG.modeRebate.halfYearly)))
-    expect(y.modal).toBe(Math.round(12000 * (1 - CONFIG.modeRebate.yearly)))
+    expect(CONFIG.modeRebate.quarterly).toBe(0.005)
+    expect(q.modal).toBe(Math.round(3000 * 0.995))
+    expect(h.modal).toBe(Math.round(6000 * 0.99))
+    expect(y.modal).toBe(Math.round(12000 * 0.98))
+  })
+
+  it('pays a terminal bonus of ₹20 per ₹10,000 (max ₹1,000) on 20+ year WLA/EA policies', () => {
+    expect(terminalBonusFor('EA', 100_000, 30)).toBe(200)
+    expect(terminalBonusFor('EA', 500_000, 30)).toBe(1000)
+    expect(terminalBonusFor('WLA', 1_000_000, 50)).toBe(1000)
+    expect(terminalBonusFor('EA', 500_000, 19)).toBe(0)
+    expect(terminalBonusFor('AEA', 500_000, 20)).toBe(0)
+    expect(terminalBonusFor('JOINT', 500_000, 20)).toBe(0)
   })
 
   it('solves IRR for a simple cash-flow', () => {
@@ -51,10 +65,11 @@ describe('calculate()', () => {
     expect(r.issues).toEqual([])
     expect(r.term).toBe(30)
     expect(r.bonus.total).toBe((500_000 / 1000) * 52 * 30)
-    expect(r.maturity.finalPayout).toBe(500_000 + r.bonus.total)
+    expect(r.bonus.terminal).toBe(1000)
+    expect(r.maturity.finalPayout).toBe(500_000 + r.bonus.total + 1000)
     expect(r.years).toHaveLength(30)
-    expect(r.years[0].gst).toBeCloseTo(r.years[0].base * 0.045, 2)
-    expect(r.years[1].gst).toBeCloseTo(r.years[1].base * 0.0225, 2)
+    expect(r.years[0].gst).toBe(0)
+    expect(r.totals.gst).toBe(0)
     expect(r.totals.outgo).toBeCloseTo(r.years.at(-1)!.cumulative, 1)
     expect(r.returns.irr).not.toBeNull()
     expect(r.returns.irr!).toBeGreaterThan(0.04)
@@ -78,6 +93,30 @@ describe('calculate()', () => {
     expect(r.maturity.survivalPaid).toBe(600_000)
     expect(r.maturity.finalPayout).toBe(400_000 + 1000 * 48 * 20)
     expect(r.maturity.totalBenefit).toBe(1_000_000 + r.bonus.total)
+    expect(r.bonus.terminal).toBe(0)
+    // money-back plans do not permit policy loans
+    expect(r.loan.eligibleAfterYears).toBeNull()
+    expect(r.loan.schedule.every((row) => row.loanValue === 0)).toBe(true)
+  })
+
+  it('reproduces the research illustration: ₹10L Suraksha at 30 → ₹32,81,000 accrued at 60, full payout at 80', () => {
+    const r = calculate({
+      planId: 'pli-suraksha',
+      age: 30,
+      sumAssured: 1_000_000,
+      ceasingAge: 60,
+      paymentMode: 'monthly',
+      applySARebate: true,
+    })
+    expect(r.maturity.accruedValueAtPremiumEnd).toBe(1_000_000 + 1000 * 76 * 30)
+    expect(r.milestones.find((m) => m.kind === 'premiumEnd')?.amount).toBe(3_280_000)
+    expect(r.bonus.terminal).toBe(1000)
+    expect(r.maturity.finalPayout).toBe(1_000_000 + 1000 * 76 * 50 + 1000)
+  })
+
+  it('caps Suvidha entry age at 50', () => {
+    const r = calculate({ planId: 'pli-suvidha', age: 52, sumAssured: 100_000, ceasingAge: 60, paymentMode: 'monthly', applySARebate: true })
+    expect(r.issues.map((i) => i.code)).toContain('AGE_RANGE')
   })
 
   it('handles Gram Priya 20/20/60 schedule', () => {
@@ -111,7 +150,7 @@ describe('calculate()', () => {
     expect(r.term).toBe(50)
     expect(r.years[30].base).toBe(0)
     expect(r.bonus.total).toBe(1000 * 76 * 50)
-    expect(r.milestones.some((m) => m.kind === 'premiumEnd' && m.year === 30)).toBe(true)
+    expect(r.milestones.some((m) => m.kind === 'premiumEnd' && m.year === 30 && m.amount === 1_000_000 + 1000 * 76 * 30)).toBe(true)
   })
 
   it('splits Suvidha bonus & premium at conversion', () => {
@@ -169,14 +208,27 @@ describe('calculate()', () => {
 })
 
 describe('utilities', () => {
-  it('computes default fee as ₹1 per ₹100 per month', () => {
+  it('computes default fee as ₹1 per ₹100 per month while the policy is in force', () => {
     const f = calculateFine({ premium: 1250, monthsOverdue: 3, instalmentsDue: 3, policyOverThreeYears: false })
     // instalments overdue 3, 2 and 1 months → 6 fee-months × ₹13
     expect(f.feePerInstalmentPerMonth).toBe(13)
     expect(f.totalFee).toBe(78)
     expect(f.arrears).toBe(3750)
+    expect(f.gstOnArrears).toBe(0)
     expect(f.lapsed).toBe(false)
     expect(f.monthsToLapse).toBe(3)
+    expect(f.totalPayable).toBe(3750 + 78)
+  })
+
+  it('charges compound revival interest instead of default fee once lapsed', () => {
+    const f = calculateFine({ premium: 1000, monthsOverdue: 12, instalmentsDue: 12, policyOverThreeYears: false })
+    expect(f.lapsed).toBe(true)
+    expect(f.revivalInterestRate).toBe(0.12)
+    // ≈ 1000 × Σ_{k=1..12} ((1.12)^(k/12) − 1)
+    let expected = 0
+    for (let k = 1; k <= 12; k++) expected += 1000 * (Math.pow(1.12, k / 12) - 1)
+    expect(f.revivalInterest).toBeCloseTo(Math.round(expected * 100) / 100, 2)
+    expect(f.totalPayable).toBeCloseTo(12_000 + f.revivalInterest, 2)
   })
 
   it('checks eligibility', () => {

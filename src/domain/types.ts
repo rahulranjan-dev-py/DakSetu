@@ -61,8 +61,8 @@ export interface PlanSpec {
   moneyBack?: Record<number, MoneyBackStep[]>
   /** Entry-age caps keyed by term (AEA plans) */
   maxAgeByTerm?: Record<number, number>
-  /** Policy loan available after this many years of premium payment */
-  loanAfterYears: number
+  /** Policy loan available after this many years of premium payment (null = loans not permitted) */
+  loanAfterYears: number | null
   /** Surrender allowed after this many years */
   surrenderAfterYears: number
   /** Bonus is credited on surrender / paid-up only after this many years */
@@ -78,11 +78,23 @@ export interface PlanSpec {
 }
 
 export interface Config {
-  gst: { firstYear: number; renewal: number }
-  saRebate: { enabled: boolean; threshold: number; step: number; amountPerStep: number }
+  gst: {
+    firstYear: number
+    renewal: number
+    /** ISO date from which individual life insurance premiums are GST-exempt */
+    exemptFrom: string
+    legacy: { firstYear: number; renewal: number }
+  }
+  saRebate: { enabled: boolean; minSA: number; baseAmount: number; step: number; amountPerStep: number }
   modeRebate: Record<PaymentMode, number>
   modeMultiplier: Record<PaymentMode, number>
   instalmentsPerYear: Record<PaymentMode, number>
+  terminalBonus: { per10000: number; cap: number; minTerm: number; kinds: PlanKind[] }
   loan: { pctOfSurrender: number }
-  lateFee: { ratePer100PerMonth: number; lapseMonthsUnder3Years: number; lapseMonthsAfter3Years: number }
+  lateFee: {
+    ratePer100PerMonth: number
+    lapseMonthsUnder3Years: number
+    lapseMonthsAfter3Years: number
+    revivalInterestRate: number
+  }
 }

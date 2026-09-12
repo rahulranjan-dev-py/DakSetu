@@ -71,7 +71,7 @@ function Bar({
         </div>
       </div>
       <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-600">
-        {segments.map((s) => (
+        {segments.filter((s) => s.value > 0).map((s) => (
           <span key={s.key} className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: COLORS[s.key] }} />
             {s.label} <span className="tabular font-semibold text-slate-800">{formatShortINR(s.value, lang)}</span>
@@ -116,9 +116,12 @@ export function InvestmentChart({ result }: { result: CalcResult }) {
           accent="text-postal-700"
           segments={[
             { key: 'sa', label: t('invest.sa'), value: result.maturity.sumAssured },
-            { key: 'bonus', label: t('invest.bonus'), value: result.bonus.total },
+            { key: 'bonus', label: t('invest.bonus'), value: result.bonus.total + result.bonus.terminal },
           ]}
         />
+        {result.bonus.terminal > 0 && (
+          <p className="-mt-2 text-[11px] text-slate-500">{t('invest.terminalIncl', { amt: formatINR(result.bonus.terminal) })}</p>
+        )}
         <div className="grid grid-cols-3 gap-2 border-t border-dashed border-slate-200 pt-3">
           <div>
             <div className="text-[11px] text-slate-500">{t('invest.gain')}</div>

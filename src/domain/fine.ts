@@ -16,6 +16,10 @@ export interface FineResult {
   totalFee: number
   arrears: number
   gstOnArrears: number
+  /** Compound interest on arrears charged on revival of a lapsed policy */
+  revivalInterest: number
+  revivalInterestRate: number
+  /** Arrears + default fee (in force) or arrears + revival interest (lapsed), plus any GST */
   totalPayable: number
   lapseAfterMonths: number
   lapsed: boolean
@@ -44,15 +48,28 @@ export function calculateFine(input: FineInput): FineResult {
   const lapseAfterMonths = policyOverThreeYears
     ? CONFIG.lateFee.lapseMonthsAfter3Years
     : CONFIG.lateFee.lapseMonthsUnder3Years
+  const lapsed = m >= lapseAfterMonths
 
+  // Revival: each outstanding instalment accrues compound interest for the months it was unpaid
+  const rate = CONFIG.lateFee.revivalInterestRate
+  let revivalInterest = 0
+  for (let i = 0; i < n; i++) {
+    const monthsOutstanding = Math.max(0, m - i)
+    revivalInterest += premium * (Math.pow(1 + rate, monthsOutstanding / 12) - 1)
+  }
+  revivalInterest = Math.round(revivalInterest * 100) / 100
+
+  const charges = lapsed ? revivalInterest : totalFee
   return {
     feePerInstalmentPerMonth,
     totalFee,
     arrears,
     gstOnArrears,
-    totalPayable: Math.round((arrears + gstOnArrears + totalFee) * 100) / 100,
+    revivalInterest,
+    revivalInterestRate: rate,
+    totalPayable: Math.round((arrears + gstOnArrears + charges) * 100) / 100,
     lapseAfterMonths,
-    lapsed: m >= lapseAfterMonths,
+    lapsed,
     monthsToLapse: Math.max(0, lapseAfterMonths - m),
   }
 }

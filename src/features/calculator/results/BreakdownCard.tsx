@@ -7,8 +7,10 @@ import { formatINR } from '@/domain/format.ts'
 import { useI18n } from '@/i18n'
 
 export function BreakdownCard({ result }: { result: CalcResult }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const p = result.premium
+  const gstApplies = CONFIG.gst.firstYear > 0 || CONFIG.gst.renewal > 0
+  const gstExemptDate = new Date(CONFIG.gst.exemptFrom).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
   return (
     <Card>
       <CardHeader>
@@ -28,10 +30,22 @@ export function BreakdownCard({ result }: { result: CalcResult }) {
             value={formatINR(p.modal)}
           />
         )}
-        <StatRow label={`${t('result.gst')} ${CONFIG.gst.firstYear * 100}% (${t('result.hero.firstYear')})`} value={formatINR(p.gstFirstYear, { decimals: true })} />
-        <StatRow label={`${t('result.total')} (${t('result.hero.firstYear')})`} value={formatINR(p.totalFirstYear, { decimals: true })} emphasis />
-        <StatRow label={`${t('result.gst')} ${CONFIG.gst.renewal * 100}% (${t('result.hero.renewal')})`} value={formatINR(p.gstRenewal, { decimals: true })} />
-        <StatRow label={`${t('result.total')} (${t('result.hero.renewal')})`} value={formatINR(p.totalRenewal, { decimals: true })} emphasis />
+        {gstApplies ? (
+          <>
+            <StatRow label={`${t('result.gst')} ${CONFIG.gst.firstYear * 100}% (${t('result.hero.firstYear')})`} value={formatINR(p.gstFirstYear, { decimals: true })} />
+            <StatRow label={`${t('result.total')} (${t('result.hero.firstYear')})`} value={formatINR(p.totalFirstYear, { decimals: true })} emphasis />
+            <StatRow label={`${t('result.gst')} ${CONFIG.gst.renewal * 100}% (${t('result.hero.renewal')})`} value={formatINR(p.gstRenewal, { decimals: true })} />
+            <StatRow label={`${t('result.total')} (${t('result.hero.renewal')})`} value={formatINR(p.totalRenewal, { decimals: true })} emphasis />
+          </>
+        ) : (
+          <>
+            <StatRow label={t('result.total')} value={formatINR(p.totalRenewal, { decimals: p.totalRenewal % 1 !== 0 })} emphasis />
+            <p className="pt-2 text-[11px] text-emerald-700">{t('result.gstExempt', { date: gstExemptDate })}</p>
+          </>
+        )}
+        {result.bonus.terminal > 0 && (
+          <StatRow label={t('result.terminalBonus')} sub={t('result.terminalBonusHint')} value={formatINR(result.bonus.terminal)} />
+        )}
       </CardContent>
     </Card>
   )

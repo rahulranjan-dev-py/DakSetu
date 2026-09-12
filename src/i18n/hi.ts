@@ -52,7 +52,7 @@ export const hi: Record<TranslationKey, string> = {
   'input.years': '{n} वर्ष',
   'input.paymentMode': 'भुगतान का तरीका',
   'input.saRebate': 'उच्च बीमित राशि पर छूट',
-  'input.saRebateHint': '₹{threshold} से ऊपर हर ₹{step} पर ₹{amt}/माह की छूट',
+  'input.saRebateHint': '₹{minSA} SA से ₹{base}/माह, और हर अगले ₹{step} पर ₹{amt}/माह की छूट',
   'input.conversion': 'बंदोबस्ती में बदलें',
   'input.conversion.none': 'आजीवन ही रखें',
   'input.conversion.after': '{n} वर्ष बाद',
@@ -73,6 +73,8 @@ export const hi: Record<TranslationKey, string> = {
   'result.hero.perHalfYear': 'प्रति छमाही',
   'result.hero.perYear': 'प्रति वर्ष',
   'result.hero.inclGst': '{pct}% GST सहित',
+  'result.hero.gstExempt': 'GST मुक्त · हर वर्ष समान',
+  'result.hero.premium': 'प्रीमियम',
   'result.hero.monthlyEq': '≈ {amt}/माह',
   'result.hero.afterConversion': 'रूपांतरण के बाद',
   'result.breakdown': 'प्रीमियम विवरण',
@@ -83,6 +85,9 @@ export const hi: Record<TranslationKey, string> = {
   'result.modeRebate': 'अग्रिम भुगतान छूट',
   'result.modal': 'किस्त प्रीमियम (मूल)',
   'result.gst': 'GST',
+  'result.gstExempt': 'GST: शून्य – {date} से व्यक्तिगत जीवन बीमा GST मुक्त',
+  'result.terminalBonus': 'परिपक्वता पर टर्मिनल बोनस',
+  'result.terminalBonusHint': '₹10,000 SA पर ₹20, अधिकतम ₹1,000 (आजीवन / बंदोबस्ती, 20+ वर्ष अवधि)',
   'result.total': 'कुल देय',
   'result.term': 'पॉलिसी अवधि',
   'result.premiumTerm': 'प्रीमियम भुगतान अवधि',
@@ -97,6 +102,7 @@ export const hi: Record<TranslationKey, string> = {
   'invest.gst': 'GST',
   'invest.sa': 'बीमित राशि',
   'invest.bonus': 'कुल बोनस',
+  'invest.terminalIncl': 'टर्मिनल बोनस {amt} सहित',
   'invest.gain': 'शुद्ध लाभ',
   'invest.roi': 'निवेश पर लाभ',
   'invest.irr': 'वार्षिक रिटर्न (IRR)',
@@ -108,6 +114,7 @@ export const hi: Record<TranslationKey, string> = {
   'timeline.maturityFinal': '{pct}% + पूरा बोनस',
   'timeline.conversion': 'बंदोबस्ती में परिवर्तित',
   'timeline.premiumEnd': 'प्रीमियम बंद',
+  'timeline.premiumEndValue': 'अर्जित मूल्य (SA + बोनस)। जीवन कवर जारी; पूरा भुगतान {age} वर्ष पर।',
   'timeline.year': 'वर्ष {n}',
   'timeline.age': 'आयु {n}',
   'timeline.bonusIncl': 'बोनस {amt} सहित',
@@ -120,6 +127,7 @@ export const hi: Record<TranslationKey, string> = {
   'loan.surrender': 'समर्पण मूल्य',
   'loan.loan': 'ऋण (≈{pct}%)',
   'loan.note': 'अनुमानित मूल्य; वास्तविक राशि CPC/मंडल कार्यालय के अनुसार।',
+  'loan.notAvailable': 'मनी-बैक योजनाओं पर पॉलिसी ऋण नहीं',
 
   'protection.title': 'परिवार की सुरक्षा',
   'protection.desc': 'अवधि के दौरान मृत्यु पर नामिती को बीमित राशि + अर्जित बोनस मिलता है।',
@@ -161,7 +169,7 @@ export const hi: Record<TranslationKey, string> = {
 
   'disclaimer.title': 'सांकेतिक कोटेशन',
   'disclaimer.body':
-    'प्रीमियम इंडिया पोस्ट की मानक दर तालिकाओं ({date} तक कैलिब्रेटेड) पर आधारित हैं। बोनस अंतिम घोषित सरल प्रत्यावर्ती बोनस है और भविष्य के लिए गारंटीकृत नहीं है। अंतिम प्रीमियम प्रस्ताव के समय आधिकारिक PLI/RPLI दर तालिका व McCamish प्रणाली के अनुसार होगा।',
+    'प्रीमियम इंडिया पोस्ट की मानक दर तालिकाओं ({date} तक कैलिब्रेटेड) पर आधारित हैं। बोनस अंतिम घोषित सरल प्रत्यावर्ती बोनस है और भविष्य के लिए गारंटीकृत नहीं है। अंतिम प्रीमियम प्रस्ताव के समय आधिकारिक PLI/RPLI दर तालिका व McCamish प्रणाली के अनुसार होगा। 22 सितंबर 2025 से प्रीमियम पर GST नहीं लगता (CBIC अधिसूचना 16/2025)।',
 
   'agent.title': 'एजेंट / कार्यालय विवरण',
   'agent.hint': 'PDF कोटेशन व WhatsApp संदेश में छपेगा।',
@@ -185,10 +193,12 @@ export const hi: Record<TranslationKey, string> = {
   'fine.feePerMonth': 'प्रति किस्त प्रति माह शुल्क',
   'fine.totalFee': 'कुल विलंब शुल्क',
   'fine.arrears': 'बकाया प्रीमियम',
-  'fine.gst': 'बकाया पर GST (2.25%)',
+  'fine.gst': 'बकाया पर GST',
+  'fine.revivalInterest': 'पुनरुद्धार ब्याज ({pct}% वार्षिक, चक्रवृद्धि)',
+  'fine.revivalNote': 'लैप्स पॉलिसी का पुनरुद्धार बकाया + चक्रवृद्धि ब्याज व मेडिकल प्रमाणपत्र से होता है; डिफ़ॉल्ट फ़ीस लागू नहीं।',
   'fine.total': 'कुल देय राशि',
   'fine.lapseIn': '{n} और माह में भुगतान न होने पर पॉलिसी लैप्स हो जाएगी।',
-  'fine.lapsed': 'पॉलिसी लैप्स हो चुकी है ({n}+ माह से बकाया)। पुनरुद्धार हेतु बकाया, शुल्क व मेडिकल प्रमाणपत्र आवश्यक।',
+  'fine.lapsed': 'पॉलिसी लैप्स हो चुकी है ({n}+ माह से बकाया)। पुनरुद्धार हेतु ब्याज सहित बकाया व मेडिकल प्रमाणपत्र आवश्यक।',
   'fine.rule': 'लैप्स नियम: पॉलिसी 3 वर्ष से कम पुरानी हो तो 6 माह, अन्यथा 12 माह।',
 
   'elig.title': 'पात्रता जाँच',
@@ -225,8 +235,10 @@ export const hi: Record<TranslationKey, string> = {
 
   'wa.greeting': 'नमस्ते {name}!',
   'wa.body':
-    'India Post {plan} ({product}) का आधिकारिक कोटेशन:\n• सम एश्योर्ड: {sa}\n• मासिक बचत: {premium} (पहला वर्ष, GST सहित)\n• पॉलिसी अवधि: {term} वर्ष\n• मैच्योरिटी पर कुल प्राप्ति: {maturity}{moneyback}\n• पहले दिन से जीवन कवर: {sa} + बोनस\n\nसरकारी गारंटी के साथ सुरक्षित भविष्य।\n\nसंपर्क करें: {agent}',
+    'India Post {plan} ({product}) का आधिकारिक कोटेशन:\n• सम एश्योर्ड: {sa}\n• मासिक बचत: {premium}{gstNote}\n• पॉलिसी अवधि: {term} वर्ष\n• मैच्योरिटी पर कुल प्राप्ति: {maturity}{moneyback}\n• पहले दिन से जीवन कवर: {sa} + बोनस\n\nसरकारी गारंटी के साथ सुरक्षित भविष्य।\n\nसंपर्क करें: {agent}',
   'wa.moneyback': '\n• मनी-बैक किस्तें: {list}',
+  'wa.gstNote': ' (पहला वर्ष, GST सहित)',
+  'wa.gstExempt': ' (GST नहीं)',
   'wa.footer': 'कोटेशन पोस्टल मित्र से तैयार।',
 
   'pdf.title': 'प्रीमियम कोटेशन',

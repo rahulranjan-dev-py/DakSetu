@@ -1,5 +1,6 @@
 import type { CalcResult } from '@/domain/engine.ts'
 import { formatINR } from '@/domain/format.ts'
+import { CONFIG } from '@/domain/config.ts'
 import type { Lang } from '@/domain/types.ts'
 import { translate } from '@/i18n'
 import { agentContactLine, type AgentProfile } from '@/features/agent/agent.ts'
@@ -37,6 +38,7 @@ export function buildPitchMessage({ lang, result, customerName, agent }: PitchCo
     term: result.term,
     maturity: formatINR(result.maturity.totalBenefit),
     moneyback,
+    gstNote: CONFIG.gst.firstYear > 0 ? t('wa.gstNote') : t('wa.gstExempt'),
     agent: agentContactLine(agent) || (lang === 'hi' ? 'आपका नज़दीकी डाकघर' : 'your nearest Post Office'),
   })
 
