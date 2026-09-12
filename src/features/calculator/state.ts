@@ -23,6 +23,7 @@ export interface CalculatorState {
   conversionMaturityAge: number
   paymentMode: PaymentMode
   applySARebate: boolean
+  nonStandardAgeProof: boolean
   customerName: string
   customerMobile: string
 }
@@ -43,6 +44,7 @@ const INITIAL: CalculatorState = {
   conversionMaturityAge: 60,
   paymentMode: 'monthly',
   applySARebate: true,
+  nonStandardAgeProof: false,
   customerName: '',
   customerMobile: '',
 }
@@ -154,6 +156,7 @@ export function useCalculator(): CalculatorController {
       conversionMaturityAge: state.conversionMaturityAge,
       paymentMode: state.paymentMode,
       applySARebate: state.applySARebate,
+      nonStandardAgeProof: state.nonStandardAgeProof,
     }),
     [state, anb, spouseAnb, parentAnb],
   )

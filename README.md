@@ -87,6 +87,7 @@ scripts/
 | Whole-life: premium ceasing at 55/58/60, bonus credited for the premium-paying years, SA + bonus paid at 80 or earlier death (official quotation basis) | `engine.ts` |
 | Suvidha / Gram Suvidha entry age 19–50; money-back plans have no loan; children policies have no loan or surrender; PLI Bal Jeevan min SA ₹10,000 | `domain/catalog.ts` |
 | Non-medical limits: PLI ₹2 lakh any age / ₹5 lakh up to 40; RPLI ₹1 lakh up to 35; money-back always medical | `engine.nonMedicalLimit()` |
+| RPLI non-standard age proof: +5 % on the tabular premium (Dak Sewa tick option), entry age ≤ 45 | `domain/config.ts`, `engine.buildPremium()` |
 | Loan after 3 yrs (EA/AEA/joint/child) or 4 yrs (WLA/CWLA), ≈ 90 % of surrender value | `engine.ts` |
 | Default fee ₹1 per ₹100 premium per month; lapse after 6 / 12 unpaid months; revival with 12 % compound interest on arrears, only within 5 years of first default | `domain/fine.ts` |
 | PLI eligibility categories (incl. GDS, contract, co-operative, private-school staff); RPLI via rural residence **or** an operative POSB / scheduled-bank savings account (14 Aug 2026 order); age 19–55 (45 without standard age proof) | `domain/eligibility.ts` |

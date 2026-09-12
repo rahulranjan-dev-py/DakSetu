@@ -109,6 +109,8 @@ export interface Config {
     /** Revival is not possible once this many years have passed since the first unpaid premium */
     revivalWindowYears: number
   }
+  /** RPLI: extra premium when only non-standard age proof is available, and the entry-age cap that applies */
+  rpliNonStandardAgeProof: { loading: number; maxAge: number }
   /** Non-medical underwriting thresholds */
   medical: Record<Product, { nonMedicalAnyAge: number; nonMedicalUpToAge: number; nonMedicalUpToAgeLimit: number }>
 }
