@@ -1,21 +1,24 @@
 name: Deploy to GitHub Pages
 
+# Publishes the production build to the `gh-pages` branch. GitHub serves that
+# branch at https://<owner>.github.io/<repo>/ (Pages is enabled automatically
+# for public repositories when the branch first appears; otherwise pick
+# "gh-pages" as the source under Settings → Pages once).
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,33 +28,18 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Configure GitHub Pages
-        id: pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - name: Install dependencies
         run: npm ci
 
       - name: Build for the Pages sub-path
         run: npm run build
         env:
-          # e.g. /PLI---RPLI---Calculator/ — derived from the Pages URL so a rename keeps working
-          VITE_BASE: ${{ steps.pages.outputs.base_path }}/
+          VITE_BASE: /${{ github.event.repository.name }}/
 
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
+      - name: Publish dist/ to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
+          commit_message: 'Deploy ${{ github.sha }}'
