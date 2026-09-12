@@ -47,6 +47,9 @@ export function MilestoneTimeline({ result }: { result: CalcResult }) {
                     </div>
                     <div className={cn('text-sm font-semibold', isFinal ? 'text-postal-800' : 'text-slate-800')}>{title}</div>
                     {m.bonusPart ? <div className="text-[11px] text-slate-500">{t('timeline.bonusIncl', { amt: formatINR(m.bonusPart) })}</div> : null}
+                    {m.kind === 'premiumEnd' && (
+                      <div className="text-[11px] text-slate-500">{t('timeline.premiumEndValue', { age: result.maturityAge })}</div>
+                    )}
                     {isFinal && result.maturity.survivalPaid > 0 && (
                       <div className="text-[11px] text-slate-500">{t('timeline.netFinal', { paid: formatINR(result.maturity.survivalPaid) })}</div>
                     )}

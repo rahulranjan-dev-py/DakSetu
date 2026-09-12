@@ -78,14 +78,16 @@ scripts/
 |---|---|
 | Age next birthday from DOB or entered age | `domain/age.ts` |
 | Entry age / SA limits per plan, term-specific caps (Sumangal 15y ≤ 45, 20y ≤ 40) | `domain/catalog.ts`, `engine.validate()` |
-| High-SA rebate ₹1/month per ₹20,000 above ₹1 lakh (toggle + constants) | `domain/config.ts` |
-| Mode multipliers 1×/3×/6×/12× and advance rebates 1 % (half-yearly) / 2 % (yearly) | `domain/config.ts` |
-| GST 4.5 % first year, 2.25 % renewals | `domain/config.ts` |
+| High-SA rebate: ₹1/month from ₹40,000 SA plus ₹1/month per further ₹20,000 (toggle + constants) | `domain/config.ts` |
+| Mode multipliers 1×/3×/6×/12× and advance rebates 0.5 % / 1 % / 2 % (quarterly / half-yearly / yearly, Rule 12) | `domain/config.ts` |
+| GST: NIL since 22 Sep 2025 (CBIC Notification 16/2025); legacy 4.5 % / 2.25 % kept in config | `domain/config.ts` |
+| Terminal bonus ₹20 per ₹10,000 SA, max ₹1,000, on WLA/EA policies of 20+ years | `engine.terminalBonusFor()` |
 | Simple reversionary bonus = SA/1000 × rate × term (split at conversion for Suvidha) | `engine.ts` |
 | Money-back schedules 20/20/20/40 (15y & 20y) and 20/20/60 (Gram Priya) | `catalog.ts` |
-| Whole-life maturity at 80, premium ceasing at 55/58/60 | `actuarial/assumptions.ts` |
+| Whole-life maturity at 80, premium ceasing at 55/58/60; accrued value shown at premium-ceasing age | `actuarial/assumptions.ts`, `engine.ts` |
+| Suvidha / Gram Suvidha entry age 19–50; money-back plans have no policy loan | `domain/catalog.ts` |
 | Loan after 3 yrs (EA/AEA/joint/child) or 4 yrs (WLA/CWLA), ≈ 90 % of surrender value | `engine.ts` |
-| Default fee ₹1 per ₹100 premium per month; lapse after 6 / 12 unpaid months | `domain/fine.ts` |
+| Default fee ₹1 per ₹100 premium per month; lapse after 6 / 12 unpaid months; revival with 12 % compound interest on arrears | `domain/fine.ts` |
 | PLI eligibility categories, RPLI rural residence, age 19–55 | `domain/eligibility.ts` |
 
 ## Premium rate tables

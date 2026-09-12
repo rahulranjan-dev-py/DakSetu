@@ -28,6 +28,8 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
   const p = result.premium
   const date = new Date().toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
   const modeLabel = t(`mode.${p.mode}`)
+  const gstApplies = CONFIG.gst.firstYear > 0 || CONFIG.gst.renewal > 0
+  const gstExemptDate = new Date(CONFIG.gst.exemptFrom).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
   const Row = ({ k, v, bold }: { k: string; v: string; bold?: boolean }) => (
     <tr className="border-b border-slate-100">
@@ -76,19 +78,31 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       {/* Headline */}
       <div className="mt-4 grid grid-cols-3 gap-3">
         <div className="rounded-lg border-2 border-postal-600 p-3">
-          <div className="text-[10px] font-bold uppercase text-postal-700">{t('result.hero.title')} · {t('result.hero.firstYear')}</div>
-          <div className="text-2xl font-extrabold tabular">{formatINR(p.totalFirstYear, { decimals: true })}</div>
+          <div className="text-[10px] font-bold uppercase text-postal-700">
+            {t('result.hero.title')}{gstApplies ? ` · ${t('result.hero.firstYear')}` : ''}
+          </div>
+          <div className="text-2xl font-extrabold tabular">{formatINR(p.totalFirstYear, { decimals: p.totalFirstYear % 1 !== 0 })}</div>
           <div className="text-[10px] text-slate-500">
-            {modeLabel} · {t('result.hero.inclGst', { pct: CONFIG.gst.firstYear * 100 })}
+            {modeLabel} · {gstApplies ? t('result.hero.inclGst', { pct: CONFIG.gst.firstYear * 100 }) : t('result.hero.gstExempt')}
           </div>
         </div>
-        <div className="rounded-lg border border-slate-200 p-3">
-          <div className="text-[10px] font-bold uppercase text-slate-500">{t('result.hero.renewal')}</div>
-          <div className="text-2xl font-extrabold tabular">{formatINR(p.totalRenewal, { decimals: true })}</div>
-          <div className="text-[10px] text-slate-500">
-            {modeLabel} · {t('result.hero.inclGst', { pct: CONFIG.gst.renewal * 100 })}
+        {gstApplies ? (
+          <div className="rounded-lg border border-slate-200 p-3">
+            <div className="text-[10px] font-bold uppercase text-slate-500">{t('result.hero.renewal')}</div>
+            <div className="text-2xl font-extrabold tabular">{formatINR(p.totalRenewal, { decimals: true })}</div>
+            <div className="text-[10px] text-slate-500">
+              {modeLabel} · {t('result.hero.inclGst', { pct: CONFIG.gst.renewal * 100 })}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="rounded-lg border border-slate-200 p-3">
+            <div className="text-[10px] font-bold uppercase text-slate-500">{t('invest.pay')}</div>
+            <div className="text-2xl font-extrabold tabular">{formatINR(result.totals.outgo)}</div>
+            <div className="text-[10px] text-slate-500">
+              {result.premiumTerm} {t('common.years')} · {t('result.gstExempt', { date: gstExemptDate })}
+            </div>
+          </div>
+        )}
         <div className="rounded-lg bg-gold-100 p-3">
           <div className="text-[10px] font-bold uppercase text-gold-800">{t('invest.get')}</div>
           <div className="text-2xl font-extrabold tabular text-gold-900">{formatINR(result.maturity.totalBenefit)}</div>
@@ -112,7 +126,11 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
               <Row k={t('input.paymentMode')} v={modeLabel} />
               <Row k={t('result.bonusRate')} v={t('result.bonusRateValue', { n: result.bonus.rate })} />
               <Row k={t('invest.bonus')} v={formatINR(result.bonus.total)} />
-              <Row k={t('loan.title')} v={t('loan.eligibleAfter', { n: result.loan.eligibleAfterYears })} />
+              {result.bonus.terminal > 0 && <Row k={t('result.terminalBonus')} v={formatINR(result.bonus.terminal)} />}
+              <Row
+                k={t('loan.title')}
+                v={result.loan.eligibleAfterYears === null ? t('loan.notAvailable') : t('loan.eligibleAfter', { n: result.loan.eligibleAfterYears })}
+              />
             </tbody>
           </table>
         </div>
@@ -125,10 +143,19 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
               {p.saRebate > 0 && <Row k={t('result.saRebate')} v={`− ${formatINR(p.saRebate)}`} />}
               <Row k={t('result.netMonthly')} v={formatINR(p.netMonthly)} bold />
               {p.mode !== 'monthly' && <Row k={`${modeLabel} (${t('result.modeRebate')} ${p.modeRebatePct * 100}%)`} v={formatINR(p.modal)} />}
-              <Row k={`${t('result.gst')} ${CONFIG.gst.firstYear * 100}%`} v={formatINR(p.gstFirstYear, { decimals: true })} />
-              <Row k={`${t('result.total')} – ${t('result.hero.firstYear')}`} v={formatINR(p.totalFirstYear, { decimals: true })} bold />
-              <Row k={`${t('result.gst')} ${CONFIG.gst.renewal * 100}%`} v={formatINR(p.gstRenewal, { decimals: true })} />
-              <Row k={`${t('result.total')} – ${t('result.hero.renewal')}`} v={formatINR(p.totalRenewal, { decimals: true })} bold />
+              {gstApplies ? (
+                <>
+                  <Row k={`${t('result.gst')} ${CONFIG.gst.firstYear * 100}%`} v={formatINR(p.gstFirstYear, { decimals: true })} />
+                  <Row k={`${t('result.total')} – ${t('result.hero.firstYear')}`} v={formatINR(p.totalFirstYear, { decimals: true })} bold />
+                  <Row k={`${t('result.gst')} ${CONFIG.gst.renewal * 100}%`} v={formatINR(p.gstRenewal, { decimals: true })} />
+                  <Row k={`${t('result.total')} – ${t('result.hero.renewal')}`} v={formatINR(p.totalRenewal, { decimals: true })} bold />
+                </>
+              ) : (
+                <>
+                  <Row k={t('result.gst')} v="NIL" />
+                  <Row k={t('result.total')} v={formatINR(p.totalRenewal, { decimals: p.totalRenewal % 1 !== 0 })} bold />
+                </>
+              )}
               {result.premiumAfterConversion && (
                 <Row k={t('result.hero.afterConversion')} v={formatINR(result.premiumAfterConversion.totalRenewal, { decimals: true })} />
               )}
@@ -145,7 +172,9 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
             <div className="text-[10px] text-slate-500">{t('invest.pay')}</div>
             <div className="text-sm font-bold tabular">{formatINR(result.totals.outgo)}</div>
             <div className="text-[9px] text-slate-400">
-              {t('invest.premiums')} {formatINR(result.totals.basePremiums)} + {t('invest.gst')} {formatINR(result.totals.gst)}
+              {gstApplies
+                ? `${t('invest.premiums')} ${formatINR(result.totals.basePremiums)} + ${t('invest.gst')} ${formatINR(result.totals.gst)}`
+                : `${result.premiumTerm} ${t('common.years')} · GST NIL`}
             </div>
           </div>
           <div className="rounded-lg bg-slate-50 p-2">
@@ -173,7 +202,11 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
               <li key={i} className="flex justify-between border-b border-dotted border-slate-200 py-0.5">
                 <span>
                   {t('timeline.year', { n: m.year })} ({t('timeline.age', { n: m.age })}) ·{' '}
-                  {m.kind === 'survival' ? t('timeline.survival', { pct: m.pct ?? 0 }) : t('timeline.maturity')}
+                  {m.kind === 'survival'
+                    ? t('timeline.survival', { pct: m.pct ?? 0 })
+                    : m.kind === 'premiumEnd'
+                      ? t('timeline.premiumEnd')
+                      : t('timeline.maturity')}
                 </span>
                 <span className="font-bold tabular">{formatINR(m.amount)}</span>
               </li>
@@ -190,7 +223,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
               <th className="px-1.5 py-1">{t('table.year')}</th>
               <th className="px-1.5 py-1">{t('table.age')}</th>
               <th className="px-1.5 py-1 text-right">{t('table.premium')}</th>
-              <th className="px-1.5 py-1 text-right">{t('table.gst')}</th>
+              {gstApplies && <th className="px-1.5 py-1 text-right">{t('table.gst')}</th>}
               <th className="px-1.5 py-1 text-right">{t('table.total')}</th>
               <th className="px-1.5 py-1 text-right">{t('table.cumulative')}</th>
               <th className="px-1.5 py-1 text-right">{t('table.benefit')}</th>
@@ -203,7 +236,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
                 <td className="px-1.5 py-0.5 font-semibold">{r.year}</td>
                 <td className="px-1.5 py-0.5 text-slate-500">{r.age}</td>
                 <td className="px-1.5 py-0.5 text-right">{r.base ? formatINR(r.base) : '—'}</td>
-                <td className="px-1.5 py-0.5 text-right text-slate-500">{r.gst ? formatINR(r.gst, { decimals: true }) : '—'}</td>
+                {gstApplies && <td className="px-1.5 py-0.5 text-right text-slate-500">{r.gst ? formatINR(r.gst, { decimals: true }) : '—'}</td>}
                 <td className="px-1.5 py-0.5 text-right font-semibold">{r.total ? formatINR(r.total, { decimals: true }) : '—'}</td>
                 <td className="px-1.5 py-0.5 text-right text-slate-500">{formatINR(r.cumulative)}</td>
                 <td className="px-1.5 py-0.5 text-right font-bold text-postal-700">{r.inflow ? formatINR(r.inflow) : '—'}</td>

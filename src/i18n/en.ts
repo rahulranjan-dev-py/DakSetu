@@ -50,7 +50,7 @@ export const en = {
   'input.years': '{n} yrs',
   'input.paymentMode': 'Payment mode',
   'input.saRebate': 'High sum assured rebate',
-  'input.saRebateHint': '₹{amt}/month off for every ₹{step} above ₹{threshold}',
+  'input.saRebateHint': '₹{base}/month from ₹{minSA} SA, plus ₹{amt}/month for every further ₹{step}',
   'input.conversion': 'Convert to Endowment',
   'input.conversion.none': 'Keep as whole life',
   'input.conversion.after': 'After {n} years',
@@ -71,6 +71,8 @@ export const en = {
   'result.hero.perHalfYear': 'per half-year',
   'result.hero.perYear': 'per year',
   'result.hero.inclGst': 'incl. {pct}% GST',
+  'result.hero.gstExempt': 'GST exempt · same every year',
+  'result.hero.premium': 'Premium',
   'result.hero.monthlyEq': '≈ {amt}/month',
   'result.hero.afterConversion': 'After conversion',
   'result.breakdown': 'Premium breakdown',
@@ -81,6 +83,9 @@ export const en = {
   'result.modeRebate': 'Advance payment rebate',
   'result.modal': 'Modal premium (base)',
   'result.gst': 'GST',
+  'result.gstExempt': 'GST: NIL – individual life insurance exempt since {date}',
+  'result.terminalBonus': 'Terminal bonus at maturity',
+  'result.terminalBonusHint': '₹20 per ₹10,000 SA, max ₹1,000 (Whole Life / Endowment, 20+ yr term)',
   'result.total': 'Total payable',
   'result.term': 'Policy term',
   'result.premiumTerm': 'Premium paying term',
@@ -95,6 +100,7 @@ export const en = {
   'invest.gst': 'GST',
   'invest.sa': 'Sum assured',
   'invest.bonus': 'Total bonus',
+  'invest.terminalIncl': 'includes terminal bonus {amt}',
   'invest.gain': 'Net gain',
   'invest.roi': 'Return on investment',
   'invest.irr': 'Annualised return (IRR)',
@@ -106,6 +112,7 @@ export const en = {
   'timeline.maturityFinal': '{pct}% + full bonus',
   'timeline.conversion': 'Converted to Endowment',
   'timeline.premiumEnd': 'Premiums stop',
+  'timeline.premiumEndValue': 'Accrued value (SA + bonus). Life cover continues; full payout at {age}.',
   'timeline.year': 'Year {n}',
   'timeline.age': 'Age {n}',
   'timeline.bonusIncl': 'incl. bonus {amt}',
@@ -118,6 +125,7 @@ export const en = {
   'loan.surrender': 'Surrender value',
   'loan.loan': 'Loan (≈{pct}%)',
   'loan.note': 'Approximate values; actual figures are as per the CPC/Divisional office.',
+  'loan.notAvailable': 'No policy loan on money-back plans',
 
   'protection.title': 'Family protection',
   'protection.desc': 'Sum assured + accrued bonus is paid to the nominee on death during the term.',
@@ -159,7 +167,7 @@ export const en = {
 
   'disclaimer.title': 'Indicative quotation',
   'disclaimer.body':
-    'Premiums are based on the standard India Post rate charts (calibrated tables, as on {date}). Bonus is the last declared simple reversionary bonus and is not guaranteed for future years. Final premium is as per the official PLI/RPLI rate chart and McCamish system at the time of proposal.',
+    'Premiums are based on the standard India Post rate charts (calibrated tables, as on {date}). Bonus is the last declared simple reversionary bonus and is not guaranteed for future years. Final premium is as per the official PLI/RPLI rate chart and McCamish system at the time of proposal. Premiums are GST-exempt since 22 Sep 2025 (CBIC Notification 16/2025).',
 
   'agent.title': 'Agent / office details',
   'agent.hint': 'Printed on PDF quotes and WhatsApp messages.',
@@ -183,10 +191,12 @@ export const en = {
   'fine.feePerMonth': 'Fee per instalment per month',
   'fine.totalFee': 'Total default fee',
   'fine.arrears': 'Premium arrears',
-  'fine.gst': 'GST on arrears (2.25%)',
+  'fine.gst': 'GST on arrears',
+  'fine.revivalInterest': 'Revival interest ({pct}% p.a., compound)',
+  'fine.revivalNote': 'Lapsed policies are revived on payment of arrears with compound interest plus a medical certificate; the default fee does not apply.',
   'fine.total': 'Total amount to pay',
   'fine.lapseIn': 'Policy will lapse if not paid within {n} more month(s).',
-  'fine.lapsed': 'Policy has lapsed (unpaid for {n}+ months). Revival needs arrears, fee and a medical certificate.',
+  'fine.lapsed': 'Policy has lapsed (unpaid for {n}+ months). Revival needs arrears with interest and a medical certificate.',
   'fine.rule': 'Lapse rule: 6 unpaid months if policy < 3 yrs old, 12 months if ≥ 3 yrs.',
 
   'elig.title': 'Eligibility checker',
@@ -223,8 +233,10 @@ export const en = {
 
   'wa.greeting': 'Namaste {name}!',
   'wa.body':
-    'Official quotation for India Post {plan} ({product}):\n• Sum Assured: {sa}\n• Monthly saving: {premium} (1st yr incl. GST)\n• Policy term: {term} years\n• Total receipt on maturity: {maturity}{moneyback}\n• Life cover from day 1: {sa} + bonus\n\nA secure future with Government of India guarantee.\n\nContact: {agent}',
+    'Official quotation for India Post {plan} ({product}):\n• Sum Assured: {sa}\n• Monthly saving: {premium}{gstNote}\n• Policy term: {term} years\n• Total receipt on maturity: {maturity}{moneyback}\n• Life cover from day 1: {sa} + bonus\n\nA secure future with Government of India guarantee.\n\nContact: {agent}',
   'wa.moneyback': '\n• Money-back instalments: {list}',
+  'wa.gstNote': ' (1st yr incl. GST)',
+  'wa.gstExempt': ' (no GST)',
   'wa.footer': 'Quote generated with Postal Mitra.',
 
   'pdf.title': 'Premium Quotation',

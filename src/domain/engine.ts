@@ -130,7 +130,10 @@ export interface CalcResult {
   bonus: {
     rate: number
     rateAfterConversion?: number
+    /** Accrued simple reversionary bonus over the full term */
     total: number
+    /** Statutory terminal bonus paid with the final settlement (0 if not eligible) */
+    terminal: number
   }
   maturity: {
     sumAssured: number
@@ -138,11 +141,14 @@ export interface CalcResult {
     finalPayout: number
     totalBenefit: number
     netGain: number
+    /** Whole life: SA + bonus accrued when premiums stop (payable on death; full payout at 80) */
+    accruedValueAtPremiumEnd?: number
   }
   milestones: Milestone[]
   returns: { roi: number; irr: number | null }
   loan: {
-    eligibleAfterYears: number
+    /** null when the plan does not permit policy loans (money-back plans) */
+    eligibleAfterYears: number | null
     schedule: LoanRow[]
   }
 }
@@ -154,10 +160,24 @@ export interface CalcResult {
 const r0 = (n: number) => Math.round(n)
 const r2 = (n: number) => Math.round(n * 100) / 100
 
+/**
+ * High sum assured rebate: ₹1/month once SA reaches ₹40,000, plus ₹1/month for
+ * every further ₹20,000 tier (Post Office Life Insurance Rules).
+ */
 export function saRebateFor(sumAssured: number, apply: boolean): number {
-  if (!apply || !CONFIG.saRebate.enabled) return 0
-  const excess = Math.max(0, sumAssured - CONFIG.saRebate.threshold)
-  return Math.floor(excess / CONFIG.saRebate.step) * CONFIG.saRebate.amountPerStep
+  const c = CONFIG.saRebate
+  if (!apply || !c.enabled || sumAssured < c.minSA) return 0
+  return c.baseAmount + Math.floor((sumAssured - c.minSA) / c.step) * c.amountPerStep
+}
+
+/**
+ * Terminal bonus: ₹20 per ₹10,000 SA capped at ₹1,000 per policy, payable on
+ * Whole Life / Endowment contracts that run for 20 years or more.
+ */
+export function terminalBonusFor(kind: PlanSpec['kind'], sumAssured: number, term: number): number {
+  const c = CONFIG.terminalBonus
+  if (!c.kinds.includes(kind) || term < c.minTerm) return 0
+  return Math.min(Math.floor(sumAssured / 10_000) * c.per10000, c.cap)
 }
 
 export function buildPremium(
@@ -365,11 +385,15 @@ export function calculate(input: CalcInput): CalcResult {
   const bonusRate2 = plan.bonusRateAfterConversion ?? bonusRate
   const bonusPerYear = (SA / 1000) * bonusRate
   const bonusPerYear2 = (SA / 1000) * bonusRate2
+  // Bonus fractions of 50 paise and above round up to the next rupee
   const accruedBonusAt = (year: number) =>
-    conversionYear > 0
-      ? Math.min(year, conversionYear) * bonusPerYear + Math.max(0, year - conversionYear) * bonusPerYear2
-      : year * bonusPerYear
+    r0(
+      conversionYear > 0
+        ? Math.min(year, conversionYear) * bonusPerYear + Math.max(0, year - conversionYear) * bonusPerYear2
+        : year * bonusPerYear,
+    )
   const totalBonus = accruedBonusAt(term)
+  const terminalBonus = terminalBonusFor(plan.kind, SA, term)
 
   // Money-back schedule -----------------------------------------------------
   const moneyBack = plan.kind === 'AEA' ? (plan.moneyBack?.[term] ?? []) : []
@@ -395,14 +419,28 @@ export function calculate(input: CalcInput): CalcResult {
       })
     }
   } else {
-    inflowByYear.set(term, { amount: SA + totalBonus, bonusPart: totalBonus })
+    const finalAmount = SA + totalBonus + terminalBonus
+    inflowByYear.set(term, { amount: finalAmount, bonusPart: totalBonus + terminalBonus })
     if (conversionYear > 0) {
       milestones.push({ year: conversionYear, age: age + conversionYear, kind: 'conversion', amount: 0 })
     }
     if (premiumTerm < term) {
-      milestones.push({ year: premiumTerm, age: age + premiumTerm, kind: 'premiumEnd', amount: 0 })
+      // Whole life: show the value accrued when premiums stop (life cover at that point)
+      milestones.push({
+        year: premiumTerm,
+        age: age + premiumTerm,
+        kind: 'premiumEnd',
+        amount: SA + accruedBonusAt(premiumTerm),
+        bonusPart: accruedBonusAt(premiumTerm),
+      })
     }
-    milestones.push({ year: term, age: age + term, kind: 'maturity', amount: SA + totalBonus, bonusPart: totalBonus })
+    milestones.push({
+      year: term,
+      age: age + term,
+      kind: 'maturity',
+      amount: finalAmount,
+      bonusPart: totalBonus + terminalBonus,
+    })
   }
   milestones.sort((a, b) => a.year - b.year)
 
@@ -455,16 +493,23 @@ export function calculate(input: CalcInput): CalcResult {
 
   // Surrender & loan (indicative) -------------------------------------------
   const schedule: LoanRow[] = []
-  for (let y = plan.loanAfterYears; y <= Math.min(term, premiumTerm); y++) {
+  const loanAllowed = plan.loanAfterYears !== null
+  const scheduleStart = plan.loanAfterYears ?? plan.surrenderAfterYears
+  for (let y = scheduleStart; y <= Math.min(term, premiumTerm); y++) {
     const paidUpValue = r0((SA * y) / premiumTerm)
     const vestedBonus = y >= plan.bonusVestingYears ? accruedBonusAt(y) : 0
-    const progress = premiumTerm > plan.loanAfterYears ? (y - plan.loanAfterYears) / (premiumTerm - plan.loanAfterYears) : 1
+    const progress = premiumTerm > scheduleStart ? (y - scheduleStart) / (premiumTerm - scheduleStart) : 1
     const factor = 0.3 + 0.6 * Math.min(1, Math.max(0, progress))
     const basisA = factor * (paidUpValue + vestedBonus)
     const paidSoFar = years.slice(0, y).reduce((s, r) => s + r.base, 0)
     const basisB = 0.3 * Math.max(0, paidSoFar - (years[0]?.base ?? 0))
     const surrenderValue = r0(Math.max(basisA, basisB))
-    schedule.push({ year: y, paidUpValue, surrenderValue, loanValue: r0(surrenderValue * CONFIG.loan.pctOfSurrender) })
+    schedule.push({
+      year: y,
+      paidUpValue,
+      surrenderValue,
+      loanValue: loanAllowed ? r0(surrenderValue * CONFIG.loan.pctOfSurrender) : 0,
+    })
   }
 
   return {
@@ -478,13 +523,19 @@ export function calculate(input: CalcInput): CalcResult {
     premiumAfterConversion,
     years,
     totals: { basePremiums, gst: gstTotal, outgo },
-    bonus: { rate: bonusRate, rateAfterConversion: conversionYear > 0 ? bonusRate2 : undefined, total: totalBonus },
+    bonus: {
+      rate: bonusRate,
+      rateAfterConversion: conversionYear > 0 ? bonusRate2 : undefined,
+      total: totalBonus,
+      terminal: terminalBonus,
+    },
     maturity: {
       sumAssured: SA,
       survivalPaid,
       finalPayout,
       totalBenefit,
       netGain: r2(totalBenefit - outgo),
+      accruedValueAtPremiumEnd: premiumTerm < term ? SA + accruedBonusAt(premiumTerm) : undefined,
     },
     milestones,
     returns: { roi, irr: annualised },

@@ -342,9 +342,10 @@ export function InputsPanel({ c }: { c: CalculatorController }) {
               <div className="text-sm font-semibold text-slate-800">{t('input.saRebate')}</div>
               <div className="text-[11px] text-slate-500">
                 {t('input.saRebateHint', {
+                  base: CONFIG.saRebate.baseAmount,
+                  minSA: formatINR(CONFIG.saRebate.minSA, { symbol: false }),
                   amt: CONFIG.saRebate.amountPerStep,
                   step: formatINR(CONFIG.saRebate.step, { symbol: false }),
-                  threshold: formatINR(CONFIG.saRebate.threshold, { symbol: false }),
                 })}
               </div>
             </div>
