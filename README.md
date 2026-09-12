@@ -78,17 +78,18 @@ scripts/
 |---|---|
 | Age next birthday from DOB or entered age | `domain/age.ts` |
 | Entry age / SA limits per plan, term-specific caps (Sumangal 15y ≤ 45, 20y ≤ 40) | `domain/catalog.ts`, `engine.validate()` |
-| High-SA rebate: ₹1/month from ₹40,000 SA plus ₹1/month per further ₹20,000 (toggle + constants) | `domain/config.ts` |
-| Mode multipliers 1×/3×/6×/12× and advance rebates 0.5 % / 1 % / 2 % (quarterly / half-yearly / yearly, Rule 12) | `domain/config.ts` |
+| High-SA rebate: ₹1/month per ₹20,000 SA, scaled by mode (SA ₹5.1L → ₹25, ₹7L → ₹35) | `domain/config.ts` |
+| Mode multipliers 1×/3×/6×/12×; advance rebates 1 % / 2 % (half-yearly / yearly) on both products, plus 0.5 % quarterly on RPLI only | `domain/config.ts` |
 | GST: NIL since 22 Sep 2025 (CBIC Notification 16/2025); legacy 4.5 % / 2.25 % kept in config | `domain/config.ts` |
 | Terminal bonus ₹20 per ₹10,000 SA, max ₹1,000, on WLA/EA policies of 20+ years | `engine.terminalBonusFor()` |
 | Simple reversionary bonus = SA/1000 × rate × term (split at conversion for Suvidha) | `engine.ts` |
 | Money-back schedules 20/20/20/40 (15y & 20y) and 20/20/60 (Gram Priya) | `catalog.ts` |
 | Whole-life maturity at 80, premium ceasing at 55/58/60; accrued value shown at premium-ceasing age | `actuarial/assumptions.ts`, `engine.ts` |
-| Suvidha / Gram Suvidha entry age 19–50; money-back plans have no policy loan | `domain/catalog.ts` |
+| Suvidha / Gram Suvidha entry age 19–50; money-back plans have no loan; children policies have no loan or surrender; PLI Bal Jeevan min SA ₹10,000 | `domain/catalog.ts` |
+| Non-medical limits: PLI ₹2 lakh any age / ₹5 lakh up to 40; RPLI ₹1 lakh up to 35; money-back always medical | `engine.nonMedicalLimit()` |
 | Loan after 3 yrs (EA/AEA/joint/child) or 4 yrs (WLA/CWLA), ≈ 90 % of surrender value | `engine.ts` |
-| Default fee ₹1 per ₹100 premium per month; lapse after 6 / 12 unpaid months; revival with 12 % compound interest on arrears | `domain/fine.ts` |
-| PLI eligibility categories, RPLI rural residence, age 19–55 | `domain/eligibility.ts` |
+| Default fee ₹1 per ₹100 premium per month; lapse after 6 / 12 unpaid months; revival with 12 % compound interest on arrears, only within 5 years of first default | `domain/fine.ts` |
+| PLI eligibility categories (incl. GDS, contract, co-operative, private-school staff); RPLI via rural residence **or** an operative POSB / scheduled-bank savings account (14 Aug 2026 order); age 19–55 (45 without standard age proof) | `domain/eligibility.ts` |
 
 ## Premium rate tables
 

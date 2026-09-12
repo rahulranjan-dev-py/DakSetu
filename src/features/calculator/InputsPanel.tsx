@@ -330,7 +330,7 @@ export function InputsPanel({ c }: { c: CalculatorController }) {
               options={MODES.map((m) => ({
                 value: m,
                 label: t(`mode.${m}`),
-                hint: CONFIG.modeRebate[m] ? t('mode.rebate', { pct: CONFIG.modeRebate[m] * 100 }) : undefined,
+                hint: CONFIG.modeRebate[plan.product][m] ? t('mode.rebate', { pct: CONFIG.modeRebate[plan.product][m] * 100 }) : undefined,
               }))}
               columns={4}
             />

@@ -21,15 +21,23 @@ export const CONFIG: Config = {
   saRebate: {
     /** Toggle default for the high sum assured rebate */
     enabled: true,
-    /** ₹1.00 per month once the sum assured reaches this amount … */
-    minSA: 40_000,
+    /**
+     * ₹1.00 per month for every ₹20,000 of sum assured (e.g. SA ₹5,10,000 → ₹25,
+     * SA ₹7,00,000 → ₹35), scaled ×3 / ×6 / ×12 for the other modes.
+     */
+    minSA: 20_000,
     baseAmount: 1,
-    /** … plus ₹1.00 per month for every further tier of this size */
     step: 20_000,
     amountPerStep: 1,
   },
-  /** Advance premium rebate (Rule 12): 3 months 0.5 %, 6 months 1 %, 12 months 2 % */
-  modeRebate: { monthly: 0, quarterly: 0.005, halfYearly: 0.01, yearly: 0.02 },
+  /**
+   * Advance premium rebate: 1 % for 6 months and 2 % for 12 months on both
+   * products; RPLI additionally allows 0.5 % for 3 months' advance.
+   */
+  modeRebate: {
+    PLI: { monthly: 0, quarterly: 0, halfYearly: 0.01, yearly: 0.02 },
+    RPLI: { monthly: 0, quarterly: 0.005, halfYearly: 0.01, yearly: 0.02 },
+  },
   modeMultiplier: { monthly: 1, quarterly: 3, halfYearly: 6, yearly: 12 },
   instalmentsPerYear: { monthly: 12, quarterly: 4, halfYearly: 2, yearly: 1 },
   terminalBonus: {
@@ -45,6 +53,8 @@ export const CONFIG: Config = {
   loan: {
     /** Loan is sanctioned up to ~90 % of the surrender value */
     pctOfSurrender: 0.9,
+    /** Loan interest 10 % p.a., calculated half-yearly */
+    interestRate: 0.1,
   },
   lateFee: {
     /** Default fee: ₹1 per ₹100 of premium (or part thereof) per month of default */
@@ -55,6 +65,14 @@ export const CONFIG: Config = {
     lapseMonthsAfter3Years: 12,
     /** Revival of a lapsed policy: arrears carry compound interest of 10–12 % p.a. */
     revivalInterestRate: 0.12,
+    /** Revival is allowed any number of times within 5 years of the first unpaid premium */
+    revivalWindowYears: 5,
+  },
+  medical: {
+    /** PLI: non-medical up to ₹2 lakh at any age, up to ₹5 lakh if aged ≤ 40 */
+    PLI: { nonMedicalAnyAge: 200_000, nonMedicalUpToAge: 500_000, nonMedicalUpToAgeLimit: 40 },
+    /** RPLI: non-medical up to ₹1 lakh if aged ≤ 35 */
+    RPLI: { nonMedicalAnyAge: 0, nonMedicalUpToAge: 100_000, nonMedicalUpToAgeLimit: 35 },
   },
 }
 

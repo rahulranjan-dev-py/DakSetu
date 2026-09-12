@@ -24,6 +24,9 @@ export interface FineResult {
   lapseAfterMonths: number
   lapsed: boolean
   monthsToLapse: number
+  /** Revival is only possible within 5 years of the first unpaid premium */
+  revivable: boolean
+  revivalWindowMonths: number
 }
 
 /**
@@ -71,6 +74,8 @@ export function calculateFine(input: FineInput): FineResult {
     lapseAfterMonths,
     lapsed,
     monthsToLapse: Math.max(0, lapseAfterMonths - m),
+    revivable: m < CONFIG.lateFee.revivalWindowYears * 12,
+    revivalWindowMonths: CONFIG.lateFee.revivalWindowYears * 12,
   }
 }
 

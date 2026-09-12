@@ -129,8 +129,15 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
               {result.bonus.terminal > 0 && <Row k={t('result.terminalBonus')} v={formatINR(result.bonus.terminal)} />}
               <Row
                 k={t('loan.title')}
-                v={result.loan.eligibleAfterYears === null ? t('loan.notAvailable') : t('loan.eligibleAfter', { n: result.loan.eligibleAfterYears })}
+                v={
+                  result.plan.surrenderAfterYears === null
+                    ? t('loan.noneChild')
+                    : result.loan.eligibleAfterYears === null
+                      ? t('loan.notAvailable')
+                      : t('loan.eligibleAfter', { n: result.loan.eligibleAfterYears })
+                }
               />
+              <Row k={t('uw.title')} v={result.medical.required ? t('uw.medical') : t('uw.nonMedical')} />
             </tbody>
           </table>
         </div>
@@ -253,7 +260,8 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
         <div className="border-t border-slate-400 pt-1 text-[10px] text-slate-500">{t('pdf.agentSign')}</div>
       </div>
 
-      <p className="mt-4 text-[9px] leading-relaxed text-slate-500">
+      <p className="mt-3 text-[9px] text-slate-600">{t('uw.tax')}</p>
+      <p className="mt-2 text-[9px] leading-relaxed text-slate-500">
         <span className="font-semibold">{t('disclaimer.title')}: </span>
         {t('disclaimer.body', { date: RATE_TABLE_META.generatedAt })}
       </p>

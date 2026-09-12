@@ -63,8 +63,8 @@ export interface PlanSpec {
   maxAgeByTerm?: Record<number, number>
   /** Policy loan available after this many years of premium payment (null = loans not permitted) */
   loanAfterYears: number | null
-  /** Surrender allowed after this many years */
-  surrenderAfterYears: number
+  /** Surrender allowed after this many years (null = surrender not permitted) */
+  surrenderAfterYears: number | null
   /** Bonus is credited on surrender / paid-up only after this many years */
   bonusVestingYears: number
   /** Convertible whole life: window in which conversion may be exercised */
@@ -86,15 +86,20 @@ export interface Config {
     legacy: { firstYear: number; renewal: number }
   }
   saRebate: { enabled: boolean; minSA: number; baseAmount: number; step: number; amountPerStep: number }
-  modeRebate: Record<PaymentMode, number>
+  /** Advance-premium rebate by product: RPLI additionally rebates 0.5 % for 3 months' advance */
+  modeRebate: Record<Product, Record<PaymentMode, number>>
   modeMultiplier: Record<PaymentMode, number>
   instalmentsPerYear: Record<PaymentMode, number>
   terminalBonus: { per10000: number; cap: number; minTerm: number; kinds: PlanKind[] }
-  loan: { pctOfSurrender: number }
+  loan: { pctOfSurrender: number; interestRate: number }
   lateFee: {
     ratePer100PerMonth: number
     lapseMonthsUnder3Years: number
     lapseMonthsAfter3Years: number
     revivalInterestRate: number
+    /** Revival is not possible once this many years have passed since the first unpaid premium */
+    revivalWindowYears: number
   }
+  /** Non-medical underwriting thresholds */
+  medical: Record<Product, { nonMedicalAnyAge: number; nonMedicalUpToAge: number; nonMedicalUpToAgeLimit: number }>
 }

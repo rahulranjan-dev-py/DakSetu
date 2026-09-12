@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Segmented } from '@/components/ui/segmented'
 import { Select } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
 import { checkEligibility, type Occupation, type Residence } from '@/domain/eligibility.ts'
 import type { Product } from '@/domain/types.ts'
 import { useI18n } from '@/i18n'
@@ -19,6 +20,10 @@ const OCCUPATIONS: Occupation[] = [
   'bank',
   'localBody',
   'education',
+  'privateSchool',
+  'gds',
+  'contractGovt',
+  'cooperative',
   'listedCompany',
   'professional',
   'graduate',
@@ -33,8 +38,13 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
   const [age, setAge] = useState(30)
   const [occupation, setOccupation] = useState<Occupation>('centralGovt')
   const [residence, setResidence] = useState<Residence>('urban')
+  const [hasOperativeAccount, setHasOperativeAccount] = useState(false)
+  const [standardAgeProof, setStandardAgeProof] = useState(true)
 
-  const r = useMemo(() => checkEligibility({ age, occupation, residence }), [age, occupation, residence])
+  const r = useMemo(
+    () => checkEligibility({ age, occupation, residence, hasOperativeAccount, standardAgeProof }),
+    [age, occupation, residence, hasOperativeAccount, standardAgeProof],
+  )
 
   const Verdict = ({ product, ok, reason }: { product: Product; ok: boolean; reason: string }) => (
     <div
@@ -101,6 +111,20 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
               columns={2}
             />
           </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+            <div>
+              <div className="text-sm font-semibold text-slate-800">{t('elig.operativeAccount')}</div>
+              <div className="text-[11px] text-slate-500">{t('elig.operativeAccountHint')}</div>
+            </div>
+            <Switch checked={hasOperativeAccount} onCheckedChange={setHasOperativeAccount} aria-label={t('elig.operativeAccount')} />
+          </div>
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+            <div>
+              <div className="text-sm font-semibold text-slate-800">{t('elig.ageProof')}</div>
+              <div className="text-[11px] text-slate-500">{t('elig.ageProofHint')}</div>
+            </div>
+            <Switch checked={standardAgeProof} onCheckedChange={setStandardAgeProof} aria-label={t('elig.ageProof')} />
+          </div>
         </CardContent>
       </Card>
       <Card>
@@ -113,7 +137,13 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
           <Verdict
             product="RPLI"
             ok={r.rpli}
-            reason={r.rpliReason === 'eligible' ? t('elig.reason.rpliOk') : t(`elig.reason.${r.rpliReason}`)}
+            reason={
+              r.rpliReason === 'eligible'
+                ? t('elig.reason.rpliOk')
+                : r.rpliReason === 'eligibleAccount'
+                  ? t('elig.reason.rpliAccountOk')
+                  : t(`elig.reason.${r.rpliReason}`)
+            }
           />
           {r.pli && r.rpli && <p className="rounded-xl bg-gold-50 p-3 text-xs text-gold-800">{t('elig.both')}</p>}
         </CardContent>

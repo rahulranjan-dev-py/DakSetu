@@ -38,20 +38,27 @@ export interface ActuarialAssumptions {
   jointLoading: number
 }
 
+/**
+ * Calibrated against India Post-linked Santosh (EA) premium figures:
+ *   age 26 / maturity 50 → ₹3.20 per ₹1,000 per month
+ *   age 27 / maturity 35 → ₹10.60 per ₹1,000 per month
+ * (both cells are also pinned exactly in rate-overrides.ts).
+ */
 export const PLI_ASSUMPTIONS: ActuarialAssumptions = {
-  interest: 0.0675,
-  expenseLoading: 0.07,
-  fixedLoadingPer1000: 0.4,
+  interest: 0.0725,
+  expenseLoading: 0.01,
+  fixedLoadingPer1000: 1.9,
   mortality: { A: 0.0004, B: 0.000045, c: 1.094 },
   childMortalityFactor: 0.6,
   childWaiverLoading: 0.03,
   jointLoading: 0.02,
 }
 
+/** RPLI premiums run a little below PLI for the same benefit (lower rural distribution cost). */
 export const RPLI_ASSUMPTIONS: ActuarialAssumptions = {
-  interest: 0.07,
-  expenseLoading: 0.05,
-  fixedLoadingPer1000: 0.3,
+  interest: 0.075,
+  expenseLoading: 0.01,
+  fixedLoadingPer1000: 1.6,
   mortality: { A: 0.0004, B: 0.000045, c: 1.094 },
   childMortalityFactor: 0.6,
   childWaiverLoading: 0.03,
