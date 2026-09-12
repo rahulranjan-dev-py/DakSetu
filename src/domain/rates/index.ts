@@ -1,0 +1,76 @@
+import tables from './premium-tables.json'
+import { RATE_OVERRIDES, overrideKey } from './rate-overrides.ts'
+import type { PlanKind, Product } from '../types.ts'
+import { PLI_ASSUMPTIONS, RPLI_ASSUMPTIONS } from '../actuarial/assumptions.ts'
+import {
+  anticipatedSpec,
+  childSpec,
+  endowmentSpec,
+  grossMonthlyRatePer1000,
+  jointLifeSpec,
+  wholeLifeSpec,
+} from '../actuarial/model.ts'
+import type { MoneyBackStep } from '../types.ts'
+
+type Table = Record<string, Record<string, number>>
+type TabulatedKind = Exclude<PlanKind, 'JOINT' | 'CWLA'>
+
+const TABLES = tables as unknown as {
+  meta: { generatedAt: string }
+  PLI: Record<TabulatedKind, Table>
+  RPLI: Record<TabulatedKind, Table>
+}
+
+export const RATE_TABLE_META = TABLES.meta
+
+export function assumptionsFor(product: Product) {
+  return product === 'PLI' ? PLI_ASSUMPTIONS : RPLI_ASSUMPTIONS
+}
+
+function lookup(product: Product, kind: TabulatedKind, termKey: number, age: number): number | undefined {
+  const override = RATE_OVERRIDES[overrideKey(product, kind, termKey, age)]
+  if (override !== undefined) return override
+  return TABLES[product][kind]?.[String(termKey)]?.[String(age)]
+}
+
+/** Monthly premium per ₹1,000 SA for an endowment (Santosh / Gram Santosh). */
+export function endowmentRate(product: Product, age: number, maturityAge: number, bonusRate: number): number {
+  return (
+    lookup(product, 'EA', maturityAge, age) ??
+    grossMonthlyRatePer1000(endowmentSpec(age, maturityAge - age, bonusRate), assumptionsFor(product))
+  )
+}
+
+/** Monthly premium per ₹1,000 SA for whole life (Suraksha / Gram Suraksha). */
+export function wholeLifeRate(product: Product, age: number, ceasingAge: number, bonusRate: number): number {
+  return (
+    lookup(product, 'WLA', ceasingAge, age) ??
+    grossMonthlyRatePer1000(wholeLifeSpec(age, ceasingAge, bonusRate), assumptionsFor(product))
+  )
+}
+
+/** Monthly premium per ₹1,000 SA for money-back plans (Sumangal / Gram Sumangal / Gram Priya). */
+export function anticipatedRate(
+  product: Product,
+  age: number,
+  term: number,
+  schedule: MoneyBackStep[],
+  bonusRate: number,
+): number {
+  return (
+    lookup(product, 'AEA', term, age) ??
+    grossMonthlyRatePer1000(anticipatedSpec(age, term, schedule, bonusRate), assumptionsFor(product))
+  )
+}
+
+/** Monthly premium per ₹1,000 SA for children policies (Bal Jeevan Bima). */
+export function childRate(product: Product, childAge: number, term: number, bonusRate: number): number {
+  const a = assumptionsFor(product)
+  return lookup(product, 'CHILD', term, childAge) ?? grossMonthlyRatePer1000(childSpec(childAge, term, bonusRate, a), a)
+}
+
+/** Monthly premium per ₹1,000 SA for joint life (Yugal Suraksha) – computed on the fly. */
+export function jointLifeRate(product: Product, age1: number, age2: number, term: number, bonusRate: number): number {
+  const a = assumptionsFor(product)
+  return grossMonthlyRatePer1000(jointLifeSpec(age1, age2, term, bonusRate, a), a)
+}
