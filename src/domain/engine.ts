@@ -30,6 +30,8 @@ export interface CalcInput {
   conversionMaturityAge?: number
   paymentMode: PaymentMode
   applySARebate: boolean
+  /** RPLI only: proposer has non-standard age proof (+5 % premium, entry age ≤ 45) */
+  nonStandardAgeProof?: boolean
 }
 
 export type ValidationCode =
@@ -43,6 +45,7 @@ export type ValidationCode =
   | 'TERM_RANGE'
   | 'AGE_FOR_TERM'
   | 'CONVERSION_TERM'
+  | 'AGE_PROOF_MAX'
 
 export interface ValidationIssue {
   code: ValidationCode
@@ -67,7 +70,11 @@ export interface PremiumBreakdown {
   modeMultiplier: number
   /** Discount embedded in the modal tabular premium vs monthly × instalments */
   modeRebatePct: number
-  /** Tabular premium per instalment for the selected mode (before SA rebate) */
+  /** Extra premium for non-standard age proof (RPLI), as a fraction of the tabular premium */
+  ageProofLoadingPct: number
+  /** Amount of that loading per instalment */
+  ageProofLoading: number
+  /** Tabular premium per instalment for the selected mode, incl. any loading (before SA rebate) */
   tabularModal: number
   /** SA rebate per instalment (monthly rebate × instalments) */
   saRebateModal: number
@@ -234,12 +241,17 @@ export function buildPremium(
   applySARebate: boolean,
   product: Product = 'PLI',
   term = 20,
+  loadingPct = 0,
 ): PremiumBreakdown {
-  const tabularMonthly = r0((ratePer1000 * sumAssured) / 1000)
-  const saRebate = Math.min(saRebateFor(sumAssured, applySARebate), Math.max(0, tabularMonthly - 1))
-  const netMonthly = Math.max(1, tabularMonthly - saRebate)
+  const baseMonthly = r0((ratePer1000 * sumAssured) / 1000)
+  const saRebate = Math.min(saRebateFor(sumAssured, applySARebate), Math.max(0, baseMonthly - 1))
   const modeMultiplier = CONFIG.modeMultiplier[mode]
-  const { tabularModal, discountPct: modeRebatePct } = tabularModalFor(product, mode, term, tabularMonthly, sumAssured)
+  const { tabularModal: baseModal, discountPct: modeRebatePct } = tabularModalFor(product, mode, term, baseMonthly, sumAssured)
+  // Loading (e.g. RPLI non-standard age proof +5 %) applies to the tabular premium, rounded to the rupee
+  const tabularMonthly = r0(baseMonthly * (1 + loadingPct))
+  const tabularModal = r0(baseModal * (1 + loadingPct))
+  const ageProofLoading = tabularModal - baseModal
+  const netMonthly = Math.max(1, tabularMonthly - saRebate)
   const saRebateModal = saRebate * modeMultiplier
   const modal = Math.max(1, tabularModal - saRebateModal)
   const gstFirstYear = r2(modal * CONFIG.gst.firstYear)
@@ -253,6 +265,8 @@ export function buildPremium(
     mode,
     modeMultiplier,
     modeRebatePct,
+    ageProofLoadingPct: loadingPct,
+    ageProofLoading,
     tabularModal,
     saRebateModal,
     modal,
@@ -305,6 +319,9 @@ export function validate(plan: PlanSpec, input: CalcInput): ValidationIssue[] {
   } else if (age < plan.minAge || age > plan.maxAge) {
     issues.push({ code: 'AGE_RANGE', params: { min: plan.minAge, max: plan.maxAge } })
   }
+
+  if (plan.product === 'RPLI' && input.nonStandardAgeProof && plan.kind !== 'CHILD' && age > CONFIG.rpliNonStandardAgeProof.maxAge)
+    issues.push({ code: 'AGE_PROOF_MAX', params: { max: CONFIG.rpliNonStandardAgeProof.maxAge } })
 
   if (plan.joint) {
     const s = input.spouseAge ?? 0
@@ -428,10 +445,11 @@ export function calculate(input: CalcInput): CalcResult {
     }
   }
 
-  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product, premiumTerm)
+  const loading = plan.product === 'RPLI' && input.nonStandardAgeProof ? CONFIG.rpliNonStandardAgeProof.loading : 0
+  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product, premiumTerm, loading)
   const premiumAfterConversion =
     conversionYear > 0
-      ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate, plan.product, term - conversionYear)
+      ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate, plan.product, term - conversionYear, loading)
       : undefined
 
   // Bonus -------------------------------------------------------------------

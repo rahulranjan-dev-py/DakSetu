@@ -109,6 +109,26 @@ describe('premium building blocks', () => {
     expect(calculate({ planId: 'rpli-gram-sumangal', age: 29, sumAssured: 500_000, term: 20, paymentMode: 'monthly', applySARebate: true }).premium.netMonthly).toBe(2475)
   })
 
+  it('reproduces the Dak Sewa RPLI quotations with non-standard age proof (+5 %)', () => {
+    const base = { planId: 'rpli-gram-santosh' as const, age: 29, sumAssured: 500_000, applySARebate: true, nonStandardAgeProof: true }
+    // maturity 35: 7150 → 7508 monthly (net 7483); 21375 → 22444 quarterly; 42625 → 44756 half-yearly; 84775 → 89014 yearly
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'monthly' }).premium.tabularMonthly).toBe(7508)
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'monthly' }).premium.netMonthly).toBe(7483)
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'quarterly' }).premium.tabularModal).toBe(22_444)
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'halfYearly' }).premium.tabularModal).toBe(44_756)
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'yearly' }).premium.tabularModal).toBe(89_014)
+    expect(calculate({ ...base, maturityAge: 35, paymentMode: 'yearly' }).premium.modal).toBe(88_714)
+    // maturity 60: 1250 → 1313 monthly (net 1288); quarterly 3675 → 3859
+    expect(calculate({ ...base, maturityAge: 60, paymentMode: 'monthly' }).premium.netMonthly).toBe(1288)
+    expect(calculate({ ...base, maturityAge: 60, paymentMode: 'quarterly' }).premium.tabularModal).toBe(3859)
+    // Gram Priya 4875 → 5119; Gram Suraksha (55) 1075 → 1129
+    expect(calculate({ planId: 'rpli-gram-priya', age: 29, sumAssured: 500_000, term: 10, paymentMode: 'monthly', applySARebate: true, nonStandardAgeProof: true }).premium.tabularMonthly).toBe(5119)
+    expect(calculate({ planId: 'rpli-gram-suraksha', age: 29, sumAssured: 500_000, ceasingAge: 55, paymentMode: 'monthly', applySARebate: true, nonStandardAgeProof: true }).premium.tabularMonthly).toBe(1129)
+    // entry age capped at 45 without standard age proof; loading never applies to PLI
+    expect(calculate({ ...base, age: 46, maturityAge: 60, paymentMode: 'monthly' }).issues.map((i) => i.code)).toContain('AGE_PROOF_MAX')
+    expect(calculate({ planId: 'pli-santosh', age: 29, sumAssured: 500_000, maturityAge: 60, paymentMode: 'monthly', applySARebate: true, nonStandardAgeProof: true }).premium.netMonthly).toBe(1275)
+  })
+
   it('reproduces the Dak Sewa PLI Suraksha and Sumangal quotations', () => {
     const s55 = calculate({ planId: 'pli-suraksha', age: 29, sumAssured: 500_000, ceasingAge: 55, paymentMode: 'monthly', applySARebate: true })
     expect(s55.premium.netMonthly).toBe(1075)

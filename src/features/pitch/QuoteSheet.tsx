@@ -146,6 +146,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
           <table className="w-full">
             <tbody>
               <Row k={t('result.rate')} v={`₹${p.ratePer1000.toFixed(2)}`} />
+              {p.ageProofLoading > 0 && <Row k={t('result.ageProofLoading', { pct: p.ageProofLoadingPct * 100 })} v={`+ ${formatINR(p.ageProofLoading)}`} />}
               <Row k={t('result.tabular')} v={formatINR(p.tabularMonthly)} />
               {p.mode !== 'monthly' && <Row k={t('result.tabularModal', { mode: modeLabel })} v={formatINR(p.tabularModal)} />}
               {p.saRebateModal > 0 && <Row k={p.mode === 'monthly' ? t('result.saRebate') : t('result.saRebateModal', { mode: modeLabel })} v={`− ${formatINR(p.saRebateModal)}`} />}

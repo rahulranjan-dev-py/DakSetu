@@ -20,6 +20,9 @@ export function BreakdownCard({ result }: { result: CalcResult }) {
       </CardHeader>
       <CardContent className="divide-y divide-dashed divide-slate-100">
         <StatRow label={t('result.rate')} value={`₹${p.ratePer1000.toFixed(2)}`} />
+        {p.ageProofLoading > 0 && (
+          <StatRow label={t('result.ageProofLoading', { pct: p.ageProofLoadingPct * 100 })} value={`+ ${formatINR(p.ageProofLoading)}`} />
+        )}
         {p.mode === 'monthly' ? (
           <>
             <StatRow label={t('result.tabular')} value={formatINR(p.tabularMonthly)} />

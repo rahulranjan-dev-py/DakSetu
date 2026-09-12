@@ -356,6 +356,19 @@ export function InputsPanel({ c }: { c: CalculatorController }) {
             </div>
             <Switch checked={state.applySARebate} onCheckedChange={(v) => set('applySARebate', v)} aria-label={t('input.saRebate')} />
           </div>
+
+          {/* RPLI: non-standard age proof loading */}
+          {plan.product === 'RPLI' && plan.kind !== 'CHILD' && (
+            <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
+              <div>
+                <div className="text-sm font-semibold text-slate-800">{t('input.nonStdAgeProof')}</div>
+                <div className="text-[11px] text-slate-500">
+                  {t('input.nonStdAgeProofHint', { pct: CONFIG.rpliNonStandardAgeProof.loading * 100, max: CONFIG.rpliNonStandardAgeProof.maxAge })}
+                </div>
+              </div>
+              <Switch checked={state.nonStandardAgeProof} onCheckedChange={(v) => set('nonStandardAgeProof', v)} aria-label={t('input.nonStdAgeProof')} />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

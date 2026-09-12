@@ -82,6 +82,12 @@ export const CONFIG: Config = {
     /** Revival is allowed any number of times within 5 years of the first unpaid premium */
     revivalWindowYears: 5,
   },
+  rpliNonStandardAgeProof: {
+    /** Dak Sewa: "Non standard age proof attracts extra 5.00 % premium" – applied to the tabular premium */
+    loading: 0.05,
+    /** Entry limited to age 45 without standard age proof */
+    maxAge: 45,
+  },
   medical: {
     /** PLI: non-medical up to ₹2 lakh at any age, up to ₹5 lakh if aged ≤ 40 */
     PLI: { nonMedicalAnyAge: 200_000, nonMedicalUpToAge: 500_000, nonMedicalUpToAgeLimit: 40 },
