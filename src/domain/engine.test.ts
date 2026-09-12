@@ -7,13 +7,28 @@ import { checkEligibility } from './eligibility.ts'
 import { ageFromDOB } from './age.ts'
 
 describe('premium building blocks', () => {
-  it('applies the high sum assured rebate: ₹1 from ₹40,000 plus ₹1 per further ₹20,000', () => {
-    expect(saRebateFor(30_000, true)).toBe(0)
-    expect(saRebateFor(40_000, true)).toBe(1)
-    expect(saRebateFor(100_000, true)).toBe(4)
-    expect(saRebateFor(500_000, true)).toBe(24)
-    expect(saRebateFor(5_000_000, true)).toBe(249)
+  it('applies the high sum assured rebate of ₹1 per ₹20,000 SA (SA ₹5.1L → ₹25, ₹7L → ₹35)', () => {
+    expect(saRebateFor(10_000, true)).toBe(0)
+    expect(saRebateFor(20_000, true)).toBe(1)
+    expect(saRebateFor(510_000, true)).toBe(25)
+    expect(saRebateFor(700_000, true)).toBe(35)
+    expect(saRebateFor(5_000_000, true)).toBe(250)
     expect(saRebateFor(5_000_000, false)).toBe(0)
+  })
+
+  it('reproduces the India Post Santosh worked examples', () => {
+    // age 26 (ANB), maturity 50, SA ₹5,10,000 → ₹1,632 tabular, ₹1,607 net monthly; yearly ₹18,702
+    const r = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'monthly', applySARebate: true })
+    expect(r.premium.tabularMonthly).toBeCloseTo(1632, 0)
+    expect(r.premium.netMonthly).toBe(1607)
+    expect(r.premium.saRebate).toBe(25)
+    const y = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'yearly', applySARebate: true })
+    expect(Math.abs(y.premium.modal - 18_702)).toBeLessThan(200)
+    // age 27, maturity 35, SA ₹7,00,000 → ₹7,385/month
+    const s = calculate({ planId: 'pli-santosh', age: 27, sumAssured: 700_000, maturityAge: 35, paymentMode: 'monthly', applySARebate: true })
+    expect(s.premium.netMonthly).toBe(7385)
+    // maturity: SA + 52 × 700 × 8 + no terminal bonus (term < 20)
+    expect(s.maturity.finalPayout).toBe(700_000 + 700 * 52 * 8)
   })
 
   it('charges NIL GST on premiums (exempt since 22 Sep 2025)', () => {
@@ -27,12 +42,13 @@ describe('premium building blocks', () => {
     expect(p.totalRenewal).toBe(1000)
   })
 
-  it('applies mode multipliers and advance premium rebates (0.5% / 1% / 2%)', () => {
-    const q = buildPremium(2.0, 500_000, 'quarterly', false)
-    const h = buildPremium(2.0, 500_000, 'halfYearly', false)
-    const y = buildPremium(2.0, 500_000, 'yearly', false)
-    expect(CONFIG.modeRebate.quarterly).toBe(0.005)
-    expect(q.modal).toBe(Math.round(3000 * 0.995))
+  it('applies mode multipliers and advance premium rebates (PLI 1% / 2%; RPLI also 0.5% quarterly)', () => {
+    const q = buildPremium(2.0, 500_000, 'quarterly', false, 'PLI')
+    const qr = buildPremium(2.0, 500_000, 'quarterly', false, 'RPLI')
+    const h = buildPremium(2.0, 500_000, 'halfYearly', false, 'PLI')
+    const y = buildPremium(2.0, 500_000, 'yearly', false, 'PLI')
+    expect(q.modal).toBe(3000)
+    expect(qr.modal).toBe(Math.round(3000 * 0.995))
     expect(h.modal).toBe(Math.round(6000 * 0.99))
     expect(y.modal).toBe(Math.round(12000 * 0.98))
   })
@@ -204,6 +220,21 @@ describe('calculate()', () => {
   it('exposes plan metadata used by the UI', () => {
     expect(PLAN_BY_ID['pli-yugal-suraksha'].joint).toBe(true)
     expect(PLAN_BY_ID['rpli-bal-jeevan'].maxSA).toBe(100_000)
+    expect(PLAN_BY_ID['pli-bal-jeevan'].minSA).toBe(10_000)
+    expect(PLAN_BY_ID['pli-bal-jeevan'].loanAfterYears).toBeNull()
+    expect(PLAN_BY_ID['pli-bal-jeevan'].surrenderAfterYears).toBeNull()
+  })
+
+  it('flags medical underwriting per the non-medical thresholds', () => {
+    const base = { planId: 'pli-santosh' as const, maturityAge: 60, paymentMode: 'monthly' as const, applySARebate: true }
+    expect(calculate({ ...base, age: 30, sumAssured: 500_000 }).medical.required).toBe(false)
+    expect(calculate({ ...base, age: 30, sumAssured: 600_000 }).medical.required).toBe(true)
+    expect(calculate({ ...base, age: 45, sumAssured: 200_000 }).medical.required).toBe(false)
+    expect(calculate({ ...base, age: 45, sumAssured: 300_000 }).medical.required).toBe(true)
+    const rural = { planId: 'rpli-gram-santosh' as const, maturityAge: 60, paymentMode: 'monthly' as const, applySARebate: true }
+    expect(calculate({ ...rural, age: 30, sumAssured: 100_000 }).medical.required).toBe(false)
+    expect(calculate({ ...rural, age: 40, sumAssured: 100_000 }).medical.required).toBe(true)
+    expect(calculate({ planId: 'pli-sumangal', age: 30, sumAssured: 100_000, term: 15, paymentMode: 'monthly', applySARebate: true }).medical.required).toBe(true)
   })
 })
 
@@ -231,10 +262,19 @@ describe('utilities', () => {
     expect(f.totalPayable).toBeCloseTo(12_000 + f.revivalInterest, 2)
   })
 
-  it('checks eligibility', () => {
-    expect(checkEligibility({ age: 30, occupation: 'centralGovt', residence: 'urban' })).toMatchObject({ pli: true, rpli: false })
-    expect(checkEligibility({ age: 30, occupation: 'farmer', residence: 'rural' })).toMatchObject({ pli: false, rpli: true })
-    expect(checkEligibility({ age: 60, occupation: 'psu', residence: 'rural' })).toMatchObject({ pli: false, rpli: false, pliReason: 'age' })
+  it('checks eligibility including the Aug 2026 savings-account route', () => {
+    const d = { hasOperativeAccount: false, standardAgeProof: true }
+    expect(checkEligibility({ age: 30, occupation: 'centralGovt', residence: 'urban', ...d })).toMatchObject({ pli: true, rpli: false, rpliReason: 'residence' })
+    expect(checkEligibility({ age: 30, occupation: 'farmer', residence: 'rural', ...d })).toMatchObject({ pli: false, rpli: true })
+    expect(checkEligibility({ age: 60, occupation: 'psu', residence: 'rural', ...d })).toMatchObject({ pli: false, rpli: false, pliReason: 'age' })
+    expect(checkEligibility({ age: 30, occupation: 'selfEmployed', residence: 'urban', hasOperativeAccount: true, standardAgeProof: true })).toMatchObject({ pli: false, rpli: true, rpliReason: 'eligibleAccount' })
+    expect(checkEligibility({ age: 50, occupation: 'farmer', residence: 'rural', hasOperativeAccount: false, standardAgeProof: false })).toMatchObject({ rpli: false, rpliReason: 'ageProof' })
+    expect(checkEligibility({ age: 30, occupation: 'gds', residence: 'rural', ...d })).toMatchObject({ pli: true, rpli: true })
+  })
+
+  it('blocks revival after 5 years of default', () => {
+    expect(calculateFine({ premium: 500, monthsOverdue: 59, instalmentsDue: 59, policyOverThreeYears: true }).revivable).toBe(true)
+    expect(calculateFine({ premium: 500, monthsOverdue: 60, instalmentsDue: 60, policyOverThreeYears: true }).revivable).toBe(false)
   })
 
   it('derives age next birthday from DOB', () => {

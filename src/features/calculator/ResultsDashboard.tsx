@@ -5,6 +5,7 @@ import { InvestmentChart } from './results/InvestmentChart.tsx'
 import { MilestoneTimeline } from './results/MilestoneTimeline.tsx'
 import { LoanCard } from './results/LoanCard.tsx'
 import { ProtectionCard } from './results/ProtectionCard.tsx'
+import { UnderwritingCard } from './results/UnderwritingCard.tsx'
 import { YearTable } from './results/YearTable.tsx'
 import { Disclaimer } from './results/Disclaimer.tsx'
 import { ErrorList } from './results/ErrorList.tsx'
@@ -29,6 +30,7 @@ export function ResultsDashboard({ result, children }: { result: CalcResult; chi
         <div className="space-y-3">
           <ProtectionCard result={result} />
           <LoanCard result={result} />
+          <UnderwritingCard result={result} />
         </div>
       </div>
       <YearTable result={result} />

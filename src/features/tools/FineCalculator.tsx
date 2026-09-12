@@ -119,7 +119,10 @@ export function FineCalculator() {
           )}
           <div className="my-2 border-t border-dashed" />
           <StatRow label={t('fine.total')} value={formatINR(fine.totalPayable, { decimals: true })} emphasis />
-          {fine.lapsed && <p className="mt-2 text-[11px] text-slate-500">{t('fine.revivalNote')}</p>}
+          {fine.lapsed && !fine.revivable && (
+            <p className="mt-2 rounded-lg bg-red-50 p-2 text-[11px] font-semibold text-red-700">{t('fine.notRevivable', { n: fine.revivalWindowMonths })}</p>
+          )}
+          {fine.lapsed && fine.revivable && <p className="mt-2 text-[11px] text-slate-500">{t('fine.revivalNote')}</p>}
         </CardContent>
       </Card>
     </div>

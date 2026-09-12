@@ -1,6 +1,6 @@
 import { CONFIG } from './config.ts'
 import { PLAN_BY_ID } from './catalog.ts'
-import type { PaymentMode, PlanId, PlanSpec } from './types.ts'
+import type { PaymentMode, PlanId, PlanSpec, Product } from './types.ts'
 import { anticipatedRate, childRate, endowmentRate, jointLifeRate, wholeLifeRate } from './rates/index.ts'
 import { WHOLE_LIFE_MATURITY_AGE } from './actuarial/assumptions.ts'
 
@@ -151,6 +151,14 @@ export interface CalcResult {
     eligibleAfterYears: number | null
     schedule: LoanRow[]
   }
+  /** Underwriting: whether a medical examination is required for this proposal */
+  medical: { required: boolean; nonMedicalLimit: number }
+}
+
+/** Non-medical limit for a proposer of the given age (0 = always medical). */
+export function nonMedicalLimit(product: Product, age: number): number {
+  const m = CONFIG.medical[product]
+  return age <= m.nonMedicalUpToAgeLimit ? Math.max(m.nonMedicalAnyAge, m.nonMedicalUpToAge) : m.nonMedicalAnyAge
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -185,12 +193,13 @@ export function buildPremium(
   sumAssured: number,
   mode: PaymentMode,
   applySARebate: boolean,
+  product: Product = 'PLI',
 ): PremiumBreakdown {
   const tabularMonthly = r2((ratePer1000 * sumAssured) / 1000)
   const saRebate = Math.min(saRebateFor(sumAssured, applySARebate), Math.max(0, tabularMonthly - 1))
   const netMonthly = Math.max(1, r0(tabularMonthly - saRebate))
   const modeMultiplier = CONFIG.modeMultiplier[mode]
-  const modeRebatePct = CONFIG.modeRebate[mode]
+  const modeRebatePct = CONFIG.modeRebate[product][mode]
   const modal = r0(netMonthly * modeMultiplier * (1 - modeRebatePct))
   const gstFirstYear = r2(modal * CONFIG.gst.firstYear)
   const gstRenewal = r2(modal * CONFIG.gst.renewal)
@@ -376,9 +385,9 @@ export function calculate(input: CalcInput): CalcResult {
     }
   }
 
-  const premium = buildPremium(rate, SA, paymentMode, applySARebate)
+  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product)
   const premiumAfterConversion =
-    conversionYear > 0 ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate) : undefined
+    conversionYear > 0 ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate, plan.product) : undefined
 
   // Bonus -------------------------------------------------------------------
   const bonusRate = plan.bonusRate
@@ -494,7 +503,7 @@ export function calculate(input: CalcInput): CalcResult {
   // Surrender & loan (indicative) -------------------------------------------
   const schedule: LoanRow[] = []
   const loanAllowed = plan.loanAfterYears !== null
-  const scheduleStart = plan.loanAfterYears ?? plan.surrenderAfterYears
+  const scheduleStart = plan.loanAfterYears ?? plan.surrenderAfterYears ?? Number.POSITIVE_INFINITY
   for (let y = scheduleStart; y <= Math.min(term, premiumTerm); y++) {
     const paidUpValue = r0((SA * y) / premiumTerm)
     const vestedBonus = y >= plan.bonusVestingYears ? accruedBonusAt(y) : 0
@@ -540,6 +549,12 @@ export function calculate(input: CalcInput): CalcResult {
     milestones,
     returns: { roi, irr: annualised },
     loan: { eligibleAfterYears: plan.loanAfterYears, schedule },
+    medical: (() => {
+      // Children policies need no medical for the child; underwriting is on the parent
+      const proposerAge = plan.kind === 'CHILD' ? (input.parentAge ?? age) : age
+      const limit = nonMedicalLimit(plan.product, proposerAge)
+      return { required: plan.kind === 'AEA' || SA > limit, nonMedicalLimit: limit }
+    })(),
   }
 }
 

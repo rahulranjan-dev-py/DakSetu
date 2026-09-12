@@ -10,8 +10,23 @@ export function LoanCard({ result }: { result: CalcResult }) {
   const { t } = useI18n()
   const rows = result.loan.schedule
   const loanAllowed = result.loan.eligibleAfterYears !== null
+  const surrenderAllowed = result.plan.surrenderAfterYears !== null
   const picks = [3, 4, 5, 10, 15, 20, 25, 30]
   const shown = rows.filter((r, i) => picks.includes(r.year) || i === rows.length - 1).slice(0, 7)
+  if (!surrenderAllowed) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Landmark size={14} /> {t('loan.title')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-slate-600">{t('loan.noneChild')}</p>
+        </CardContent>
+      </Card>
+    )
+  }
   return (
     <Card>
       <CardHeader>
@@ -24,7 +39,7 @@ export function LoanCard({ result }: { result: CalcResult }) {
           ) : (
             <Badge variant="red">{t('loan.notAvailable')}</Badge>
           )}
-          <Badge variant="slate">{t('loan.surrenderAfter', { n: result.plan.surrenderAfterYears })}</Badge>
+          <Badge variant="slate">{t('loan.surrenderAfter', { n: result.plan.surrenderAfterYears ?? 0 })}</Badge>
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,7 +63,10 @@ export function LoanCard({ result }: { result: CalcResult }) {
             ))}
           </tbody>
         </table>
-        <p className="mt-2 text-[11px] text-slate-400">{t('loan.note')}</p>
+        <p className="mt-2 text-[11px] text-slate-400">
+          {loanAllowed ? `${t('loan.interest', { pct: CONFIG.loan.interestRate * 100 })} · ` : ''}
+          {t('loan.note')}
+        </p>
       </CardContent>
     </Card>
   )
