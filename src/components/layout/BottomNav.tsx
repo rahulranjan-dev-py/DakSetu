@@ -1,0 +1,49 @@
+import { Calculator, Clock, ShieldQuestion, UserCog } from 'lucide-react'
+import { useI18n } from '@/i18n'
+import { cn } from '@/lib/utils'
+
+export type Screen = 'calculator' | 'fine' | 'eligibility'
+
+export function BottomNav({
+  screen,
+  onChange,
+  onOpenAgent,
+}: {
+  screen: Screen
+  onChange: (s: Screen) => void
+  onOpenAgent: () => void
+}) {
+  const { t } = useI18n()
+  const items: Array<{ id: Screen | 'agent'; label: string; Icon: typeof Calculator }> = [
+    { id: 'calculator', label: t('nav.calculator'), Icon: Calculator },
+    { id: 'fine', label: t('nav.fine'), Icon: Clock },
+    { id: 'eligibility', label: t('nav.eligibility'), Icon: ShieldQuestion },
+    { id: 'agent', label: t('nav.agent'), Icon: UserCog },
+  ]
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur pb-safe md:hidden">
+      <div className="grid grid-cols-4">
+        {items.map(({ id, label, Icon }) => {
+          const active = id === screen
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => (id === 'agent' ? onOpenAgent() : onChange(id))}
+              className={cn(
+                'flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold transition-colors',
+                active ? 'text-postal-600' : 'text-slate-500',
+              )}
+              aria-current={active ? 'page' : undefined}
+            >
+              <span className={cn('rounded-full px-4 py-1', active && 'bg-postal-50')}>
+                <Icon size={20} />
+              </span>
+              {label}
+            </button>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
