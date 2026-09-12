@@ -96,15 +96,20 @@ export function endowmentSpec(age: number, term: number, bonusRate: number): Ben
   }
 }
 
-/** Whole Life Assurance (Suraksha / Gram Suraksha) – SA + bonus at 80 or earlier death; premiums cease at 55/58/60. */
+/**
+ * Whole Life Assurance (Suraksha / Gram Suraksha) – SA + bonus at 80 or earlier
+ * death; premiums cease at 55/58/60. As in the official Dak Sewa quotation, the
+ * reversionary bonus is credited for the premium-paying years only.
+ */
 export function wholeLifeSpec(age: number, ceasingAge: number, bonusRate: number): BenefitSpec {
   const coverTerm = WHOLE_LIFE_MATURITY_AGE - age
+  const ppt = ceasingAge - age
   return {
     ages: [age],
-    premiumTerm: ceasingAge - age,
+    premiumTerm: ppt,
     coverTerm,
-    death: (y) => 1000 + bonusRate * y,
-    survival: [{ year: coverTerm, amount: 1000 + bonusRate * coverTerm }],
+    death: (y) => 1000 + bonusRate * Math.min(y, ppt),
+    survival: [{ year: coverTerm, amount: 1000 + bonusRate * ppt }],
   }
 }
 

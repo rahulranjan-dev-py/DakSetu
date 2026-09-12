@@ -146,10 +146,10 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
           <table className="w-full">
             <tbody>
               <Row k={t('result.rate')} v={`₹${p.ratePer1000.toFixed(2)}`} />
-              <Row k={t('result.tabular')} v={formatINR(p.tabularMonthly, { decimals: true })} />
-              {p.saRebate > 0 && <Row k={t('result.saRebate')} v={`− ${formatINR(p.saRebate)}`} />}
-              <Row k={t('result.netMonthly')} v={formatINR(p.netMonthly)} bold />
-              {p.mode !== 'monthly' && <Row k={`${modeLabel} (${t('result.modeRebate')} ${p.modeRebatePct * 100}%)`} v={formatINR(p.modal)} />}
+              <Row k={t('result.tabular')} v={formatINR(p.tabularMonthly)} />
+              {p.mode !== 'monthly' && <Row k={t('result.tabularModal', { mode: modeLabel })} v={formatINR(p.tabularModal)} />}
+              {p.saRebateModal > 0 && <Row k={p.mode === 'monthly' ? t('result.saRebate') : t('result.saRebateModal', { mode: modeLabel })} v={`− ${formatINR(p.saRebateModal)}`} />}
+              <Row k={p.mode === 'monthly' ? t('result.netMonthly') : t('result.netModal', { mode: modeLabel })} v={formatINR(p.modal)} bold />
               {gstApplies ? (
                 <>
                   <Row k={`${t('result.gst')} ${CONFIG.gst.firstYear * 100}%`} v={formatINR(p.gstFirstYear, { decimals: true })} />

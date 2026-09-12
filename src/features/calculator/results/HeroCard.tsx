@@ -95,7 +95,7 @@ export function HeroCard({ result }: { result: CalcResult }) {
               </div>
               <div className="text-[11px] text-white/60">
                 {t('invest.sa')} + {t('invest.bonus')}
-                {result.bonus.terminal > 0 ? ` + ${t('result.terminalBonus').toLowerCase()}` : ''}
+                {result.bonus.terminal > 0 ? ` · +${formatINR(result.bonus.terminal)} ${t('result.terminalBonus').toLowerCase()}` : ''}
               </div>
             </div>
           </div>

@@ -20,15 +20,25 @@ export function BreakdownCard({ result }: { result: CalcResult }) {
       </CardHeader>
       <CardContent className="divide-y divide-dashed divide-slate-100">
         <StatRow label={t('result.rate')} value={`₹${p.ratePer1000.toFixed(2)}`} />
-        <StatRow label={t('result.tabular')} value={formatINR(p.tabularMonthly, { decimals: true })} />
-        {p.saRebate > 0 && <StatRow label={t('result.saRebate')} value={`− ${formatINR(p.saRebate)}`} />}
-        <StatRow label={t('result.netMonthly')} value={formatINR(p.netMonthly)} emphasis />
-        {p.mode !== 'monthly' && (
-          <StatRow
-            label={`${t(`mode.${p.mode}`)} × ${p.modeMultiplier}`}
-            sub={p.modeRebatePct ? `${t('result.modeRebate')} ${p.modeRebatePct * 100}%` : undefined}
-            value={formatINR(p.modal)}
-          />
+        {p.mode === 'monthly' ? (
+          <>
+            <StatRow label={t('result.tabular')} value={formatINR(p.tabularMonthly)} />
+            {p.saRebate > 0 && <StatRow label={t('result.saRebate')} value={`− ${formatINR(p.saRebate)}`} />}
+            <StatRow label={t('result.netMonthly')} value={formatINR(p.netMonthly)} emphasis />
+          </>
+        ) : (
+          <>
+            <StatRow label={t('result.tabular')} value={formatINR(p.tabularMonthly)} />
+            <StatRow
+              label={t('result.tabularModal', { mode: t(`mode.${p.mode}`).toLowerCase() })}
+              sub={`× ${p.modeMultiplier}${p.modeRebatePct ? ` · ${(p.modeRebatePct * 100).toFixed(2)}%` : ''}`}
+              value={formatINR(p.tabularModal)}
+            />
+            {p.saRebateModal > 0 && (
+              <StatRow label={t('result.saRebateModal', { mode: t(`mode.${p.mode}`).toLowerCase() })} value={`− ${formatINR(p.saRebateModal)}`} />
+            )}
+            <StatRow label={t('result.netModal', { mode: t(`mode.${p.mode}`).toLowerCase() })} value={formatINR(p.modal)} emphasis />
+          </>
         )}
         {gstApplies ? (
           <>

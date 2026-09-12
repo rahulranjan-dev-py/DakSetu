@@ -7,6 +7,7 @@ import { Switch } from '@/components/ui/switch'
 import { Segmented } from '@/components/ui/segmented'
 import { Select } from '@/components/ui/select'
 import { CONFIG, SA_PRESETS } from '@/domain/config.ts'
+import { modeDiscount } from '@/domain/engine.ts'
 import { formatINR, formatShortINR } from '@/domain/format.ts'
 import type { PaymentMode } from '@/domain/types.ts'
 import { useI18n } from '@/i18n'
@@ -109,7 +110,7 @@ export function InputsPanel({ c }: { c: CalculatorController }) {
             )}
             <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
               <Info size={12} />
-              {c.dobValid ? t('input.anb', { n: c.anb }) : t('input.dob')} · {t('input.anbHint')}
+              {state.ageMode === 'dob' ? (c.dobValid ? t('input.anb', { n: c.anb }) : t('input.dob')) : t('input.anbHint')}
             </p>
           </div>
 
@@ -327,11 +328,15 @@ export function InputsPanel({ c }: { c: CalculatorController }) {
             <Segmented
               value={state.paymentMode}
               onChange={(v) => set('paymentMode', v)}
-              options={MODES.map((m) => ({
-                value: m,
-                label: t(`mode.${m}`),
-                hint: CONFIG.modeRebate[plan.product][m] ? t('mode.rebate', { pct: CONFIG.modeRebate[plan.product][m] * 100 }) : undefined,
-              }))}
+              options={MODES.map((m) => {
+                const d = m === 'monthly' ? 0 : modeDiscount(plan.product, m, result.premiumTerm, result.premium.tabularMonthly, state.sumAssured)
+                const pct = Math.abs(Math.round(d * 1000) / 10)
+                return {
+                  value: m,
+                  label: t(`mode.${m}`),
+                  hint: pct >= 0.1 ? t(d > 0 ? 'mode.rebate' : 'mode.loading', { pct }) : undefined,
+                }
+              })}
               columns={4}
             />
           </div>
