@@ -24,8 +24,9 @@ and **Rural Postal Life Insurance (RPLI)** policies in seconds – at the counte
 | Offline | `vite-plugin-pwa` (Workbox, precache-everything, auto-update) |
 | Tests | Vitest (calculation engine) |
 
-**Live app:** https://rahulranjan-dev-py.github.io/PLI---RPLI---Calculator/ (deployed from `main` by
-`.github/workflows/deploy.yml`).
+**Live app:** https://rahulranjan-dev-py.github.io/PLI---RPLI---Calculator/ – every push to `main`
+builds the site and publishes it to the `gh-pages` branch via `.github/workflows/deploy.yml`.
+(If the site ever shows 404, open *Settings → Pages* and select the `gh-pages` branch as the source.)
 
 ## Getting started
 
