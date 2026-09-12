@@ -3,8 +3,13 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
+// Base public path. GitHub Pages serves project sites from a sub-path, so the
+// deploy workflow sets VITE_BASE=/<repo>/ ; local dev and root-hosted deploys use '/'.
+const base = process.env.VITE_BASE ?? '/'
+
 // https://vite.dev/config/
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -17,8 +22,8 @@ export default defineConfig({
           'Offline-first India Post PLI & RPLI premium, bonus and maturity calculator for field staff.',
         lang: 'en-IN',
         dir: 'ltr',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#FFFFFF',
@@ -39,7 +44,7 @@ export default defineConfig({
         // Everything the app needs is bundled: precache it all so the app is
         // fully usable with zero connectivity after the first load.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2,json,webmanifest}'],
-        navigateFallback: '/index.html',
+        navigateFallback: `${base}index.html`,
         cleanupOutdatedCaches: true,
         maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
       },
