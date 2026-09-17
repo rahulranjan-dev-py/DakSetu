@@ -8,7 +8,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type,
     <input
       type={type}
       className={cn(
-        'flex h-11 w-full rounded-xl border border-input bg-white px-3 py-2 text-base tabular shadow-sm transition-colors placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
+        'flex h-11 w-full rounded-xl border border-input bg-white dark:bg-slate-900 px-3 py-2 text-base tabular shadow-sm transition-colors placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50',
         prefix && 'pl-8',
         suffix && 'pr-12',
         className,
@@ -21,11 +21,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, type,
   return (
     <div className="relative">
       {prefix && (
-        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500">{prefix}</span>
+        <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-500 dark:text-slate-400">{prefix}</span>
       )}
       {input}
       {suffix && (
-        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500">
+        <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs font-medium text-slate-500 dark:text-slate-400">
           {suffix}
         </span>
       )}

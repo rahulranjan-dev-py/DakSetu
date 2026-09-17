@@ -21,7 +21,7 @@ export function BottomNav({
     { id: 'agent', label: t('nav.agent'), Icon: UserCog },
   ]
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur pb-safe md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-900/95 backdrop-blur pb-safe md:hidden">
       <div className="grid grid-cols-4">
         {items.map(({ id, label, Icon }) => {
           const active = id === screen
@@ -32,11 +32,11 @@ export function BottomNav({
               onClick={() => (id === 'agent' ? onOpenAgent() : onChange(id))}
               className={cn(
                 'flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold transition-colors',
-                active ? 'text-postal-600' : 'text-slate-500',
+                active ? 'text-postal-600 dark:text-postal-300' : 'text-slate-500 dark:text-slate-400',
               )}
               aria-current={active ? 'page' : undefined}
             >
-              <span className={cn('rounded-full px-4 py-1', active && 'bg-postal-50')}>
+              <span className={cn('rounded-full px-4 py-1', active && 'bg-postal-50 dark:bg-postal-950/40')}>
                 <Icon size={20} />
               </span>
               {label}

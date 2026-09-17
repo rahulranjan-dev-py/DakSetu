@@ -20,12 +20,12 @@ export function ResultsDashboard({ result, children }: { result: CalcResult; chi
     )
   }
   return (
-    <div className="space-y-3">
+    <div className="min-w-0 space-y-3">
       <HeroCard result={result} />
       {children}
       <InvestmentChart result={result} />
       <MilestoneTimeline result={result} />
-      <div className="grid gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-3 md:grid-cols-2">
         <BreakdownCard result={result} />
         <div className="space-y-3">
           <ProtectionCard result={result} />

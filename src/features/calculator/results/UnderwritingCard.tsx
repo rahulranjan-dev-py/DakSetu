@@ -15,7 +15,7 @@ export function UnderwritingCard({ result }: { result: CalcResult }) {
           <Stethoscope size={14} /> {t('uw.title')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 text-xs text-slate-600">
+      <CardContent className="space-y-2 text-xs text-slate-600 dark:text-slate-400">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant={m.required ? 'amber' : 'green'}>
             {m.required ? <Stethoscope size={12} /> : <BadgeCheck size={12} />}
@@ -30,7 +30,7 @@ export function UnderwritingCard({ result }: { result: CalcResult }) {
           </span>
         </div>
         <p>{t('uw.tax')}</p>
-        <p className="text-[11px] text-slate-400">{t('uw.income')}</p>
+        <p className="text-[11px] text-slate-400 dark:text-slate-500">{t('uw.income')}</p>
       </CardContent>
     </Card>
   )

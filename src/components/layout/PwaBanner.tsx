@@ -17,7 +17,7 @@ export function PwaBanner() {
   if (needRefresh) {
     return (
       <div className="container mt-3">
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-gold-300 bg-gold-50 px-3 py-2 text-sm text-gold-900">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-gold-300 dark:border-gold-700 bg-gold-50 dark:bg-gold-900/20 px-3 py-2 text-sm text-gold-900 dark:text-gold-200">
           <span className="font-semibold">{t('app.updateAvailable')}</span>
           <div className="flex items-center gap-1">
             <Button size="sm" variant="amber" onClick={() => updateServiceWorker(true)}>
@@ -35,7 +35,7 @@ export function PwaBanner() {
   if (canInstall && !dismissed) {
     return (
       <div className="container mt-3">
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-postal-200 bg-postal-50 px-3 py-2 text-sm text-postal-900">
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-postal-200 dark:border-postal-800 bg-postal-50 dark:bg-postal-950/40 px-3 py-2 text-sm text-postal-900 dark:text-postal-100">
           <span>
             <span className="font-semibold">{t('app.install')}</span>
             <span className="hidden sm:inline"> · {t('app.installHint')}</span>

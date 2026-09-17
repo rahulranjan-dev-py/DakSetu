@@ -84,20 +84,20 @@ export function FineCalculator() {
               onChange={(e) => setInstalments(Math.max(1, parseInt(e.target.value || '1', 10)))}
             />
           </div>
-          <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
-            <span className="text-sm font-semibold text-slate-800">{t('fine.over3')}</span>
+          <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5">
+            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('fine.over3')}</span>
             <Switch checked={over3} onCheckedChange={setOver3} />
           </div>
-          <p className="text-xs text-slate-500">{t('fine.rule')}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">{t('fine.rule')}</p>
         </CardContent>
       </Card>
 
-      <Card className={cn(fine.lapsed ? 'border-red-300' : 'border-emerald-200')}>
+      <Card className={cn(fine.lapsed ? 'border-red-300 dark:border-red-700' : 'border-emerald-200 dark:border-emerald-800')}>
         <CardContent className="pt-4">
           <div
             className={cn(
               'mb-3 flex items-start gap-2 rounded-xl p-3 text-sm',
-              fine.lapsed ? 'bg-red-50 text-red-800' : 'bg-emerald-50 text-emerald-800',
+              fine.lapsed ? 'bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-200',
             )}
           >
             {fine.lapsed ? <AlertTriangle size={18} className="mt-0.5 shrink-0" /> : <CircleCheck size={18} className="mt-0.5 shrink-0" />}
@@ -120,9 +120,9 @@ export function FineCalculator() {
           <div className="my-2 border-t border-dashed" />
           <StatRow label={t('fine.total')} value={formatINR(fine.totalPayable, { decimals: true })} emphasis />
           {fine.lapsed && !fine.revivable && (
-            <p className="mt-2 rounded-lg bg-red-50 p-2 text-[11px] font-semibold text-red-700">{t('fine.notRevivable', { n: fine.revivalWindowMonths })}</p>
+            <p className="mt-2 rounded-lg bg-red-50 dark:bg-red-900/20 p-2 text-[11px] font-semibold text-red-700 dark:text-red-300">{t('fine.notRevivable', { n: fine.revivalWindowMonths })}</p>
           )}
-          {fine.lapsed && fine.revivable && <p className="mt-2 text-[11px] text-slate-500">{t('fine.revivalNote')}</p>}
+          {fine.lapsed && fine.revivable && <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">{t('fine.revivalNote')}</p>}
         </CardContent>
       </Card>
     </div>

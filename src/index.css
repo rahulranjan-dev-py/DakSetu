@@ -24,12 +24,37 @@
     --radius: 0.875rem;
   }
 
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 96%;
+    --card: 222 40% 11%;
+    --card-foreground: 210 40% 96%;
+    --primary: 356 70% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 43 100% 47%;
+    --accent-foreground: 24 45% 12%;
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 356 70% 55%;
+  }
+
   * {
     @apply border-border;
   }
   html {
     -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+  }
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground font-sans;
@@ -61,6 +86,9 @@
   }
   .hero-gradient {
     background: linear-gradient(135deg, #b3202a 0%, #7a1820 60%, #5f151b 100%);
+  }
+  .dark .hero-gradient {
+    background: linear-gradient(135deg, #8f1a22 0%, #5f151b 60%, #3a090d 100%);
   }
   .amber-gradient {
     background: linear-gradient(135deg, #f2a900 0%, #de911d 100%);

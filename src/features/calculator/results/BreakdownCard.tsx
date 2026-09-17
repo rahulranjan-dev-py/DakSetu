@@ -18,7 +18,7 @@ export function BreakdownCard({ result }: { result: CalcResult }) {
           <Receipt size={14} /> {t('result.breakdown')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="divide-y divide-dashed divide-slate-100">
+      <CardContent className="divide-y divide-dashed divide-slate-100 dark:divide-slate-800">
         <StatRow label={t('result.rate')} value={`₹${p.ratePer1000.toFixed(2)}`} />
         {p.ageProofLoading > 0 && (
           <StatRow label={t('result.ageProofLoading', { pct: p.ageProofLoadingPct * 100 })} value={`+ ${formatINR(p.ageProofLoading)}`} />
@@ -53,7 +53,7 @@ export function BreakdownCard({ result }: { result: CalcResult }) {
         ) : (
           <>
             <StatRow label={t('result.total')} value={formatINR(p.totalRenewal, { decimals: p.totalRenewal % 1 !== 0 })} emphasis />
-            <p className="pt-2 text-[11px] text-emerald-700">{t('result.gstExempt', { date: gstExemptDate })}</p>
+            <p className="pt-2 text-[11px] text-emerald-700 dark:text-emerald-300">{t('result.gstExempt', { date: gstExemptDate })}</p>
           </>
         )}
         {result.bonus.terminal > 0 && (

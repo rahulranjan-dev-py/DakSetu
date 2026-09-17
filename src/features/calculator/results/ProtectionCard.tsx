@@ -18,9 +18,9 @@ export function ProtectionCard({ result }: { result: CalcResult }) {
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {points.map((row) => (
-          <div key={row.year} className="rounded-xl bg-slate-50 px-3 py-2">
-            <div className="text-[11px] text-slate-500">{row.year === 1 ? t('protection.today') : t('protection.year', { n: row.year })}</div>
-            <div className="tabular text-sm font-bold text-slate-900">{formatINR(row.lifeCover)}</div>
+          <div key={row.year} className="rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2">
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">{row.year === 1 ? t('protection.today') : t('protection.year', { n: row.year })}</div>
+            <div className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">{formatINR(row.lifeCover)}</div>
           </div>
         ))}
       </CardContent>
