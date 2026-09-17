@@ -26,7 +26,7 @@ and **Rural Postal Life Insurance (RPLI)** policies in seconds – at the counte
 
 **Developed by:** Rahul Ranjan, Postal Assistant, India Post, Bokaro Steel City, Jharkhand.
 
-**Live app:** https://rahulranjan-dev-py.github.io/PLI---RPLI---Calculator/ – every push to `main`
+**Live app:** https://rahulranjan-dev-py.github.io/DakSetu/ – every push to `main`
 builds the site and publishes it to the `gh-pages` branch via `.github/workflows/deploy.yml`.
 (If the site ever shows 404, open *Settings → Pages* and select the `gh-pages` branch as the source.)
 
