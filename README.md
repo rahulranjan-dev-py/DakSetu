@@ -1,3 +1,5 @@
+<p align="center"><img src="public/icons/icon-192.png" width="120" alt="DakSetu logo"></p>
+
 # DakSetu – India Post PLI & RPLI Field Calculator
 
 A mobile-first, **offline-capable** Progressive Web App that lets India Post field staff

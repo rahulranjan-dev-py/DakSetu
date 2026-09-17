@@ -49,7 +49,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       {/* Header band */}
       <div className="flex items-center justify-between border-b-4 border-postal-600 pb-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-postal-600 text-2xl font-black text-white">₹</div>
+          <img src={`${import.meta.env.BASE_URL}icons/emblem-192.png`} alt="" width={48} height={48} className="h-12 w-12 rounded-xl" />
           <div>
             <div className="text-xl font-extrabold tracking-tight text-postal-700">{t('app.title')}</div>
             <div className="text-xs text-slate-500">{t(`product.${plan.product}.full`)} · India Post</div>

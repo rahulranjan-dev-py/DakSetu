@@ -47,7 +47,10 @@ export function AgentDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserCog className="text-postal-600 dark:text-postal-300" size={20} /> {t('agent.title')}
+            <img src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="DakSetu" width={40} height={40} className="h-10 w-10 rounded-xl" />
+            <span className="flex items-center gap-1.5">
+              <UserCog className="text-postal-600 dark:text-postal-300" size={18} /> {t('agent.title')}
+            </span>
           </DialogTitle>
           <DialogDescription>{t('agent.hint')}</DialogDescription>
         </DialogHeader>

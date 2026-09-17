@@ -1,4 +1,4 @@
-import { Languages, Mail, Moon, Sun, UserCog, WifiOff } from 'lucide-react'
+import { Languages, Moon, Sun, UserCog, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
 import { useOnline } from '@/hooks/useOnline.ts'
@@ -12,9 +12,7 @@ export function Header({ onOpenAgent, theme, onToggleTheme }: { onOpenAgent: () 
     <header className="hero-gradient sticky top-0 z-40 text-white shadow-hero">
       <div className="container flex h-14 items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/20">
-            <Mail size={18} className="text-gold-300" />
-          </span>
+          <img src={`${import.meta.env.BASE_URL}icons/emblem-192.png`} alt="" width={36} height={36} className="h-9 w-9 shrink-0 rounded-xl ring-1 ring-white/25 shadow" />
           <div className="min-w-0 leading-tight">
             <div className="truncate text-base font-extrabold tracking-tight">{t('app.title')}</div>
             <div className="truncate text-[11px] text-white/75">{t('app.subtitle')}</div>
