@@ -1,8 +1,9 @@
 {
-  "name": "postal-mitra",
+  "name": "daksetu",
   "private": true,
-  "version": "1.0.0",
-  "description": "Postal Mitra - India Post PLI & RPLI Field Calculator (offline-first PWA)",
+  "version": "1.1.0",
+  "author": "Rahul Ranjan, Postal Assistant, India Post, Bokaro Steel City, Jharkhand",
+  "description": "DakSetu - India Post PLI & RPLI Field Calculator (offline-first PWA)",
   "type": "module",
   "scripts": {
     "dev": "vite",
