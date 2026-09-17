@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import type { CalcResult } from '@/domain/engine.ts'
 import { CONFIG } from '@/domain/config.ts'
-import { formatINR, formatPct } from '@/domain/format.ts'
+import { amountInWords, formatINR, formatPct } from '@/domain/format.ts'
 import type { Lang } from '@/domain/types.ts'
 import { translate, type TranslationKey } from '@/i18n'
 import { RATE_TABLE_META } from '@/domain/rates/index.ts'
@@ -31,17 +31,23 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
   const gstApplies = CONFIG.gst.firstYear > 0 || CONFIG.gst.renewal > 0
   const gstExemptDate = new Date(CONFIG.gst.exemptFrom).toLocaleDateString(lang === 'hi' ? 'hi-IN' : 'en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
+  // Keep the sheet to one A4 page: first five years, every fifth year, payout years and the final year.
+  const lastYear = result.years[result.years.length - 1]?.year ?? 0
+  const yearRows = result.years.filter(
+    (r) => r.year <= 5 || r.year % 5 === 0 || r.inflow > 0 || r.year === lastYear || r.year === result.premiumTerm,
+  )
+
   const Row = ({ k, v, bold }: { k: string; v: string; bold?: boolean }) => (
     <tr className="border-b border-slate-100">
-      <td className="py-1 pr-3 text-[11px] text-slate-600">{k}</td>
-      <td className={`py-1 text-right text-[11px] tabular ${bold ? 'font-bold text-slate-900' : 'text-slate-800'}`}>{v}</td>
+      <td className="whitespace-nowrap py-0.5 pr-3 text-[11px] text-slate-600">{k}</td>
+      <td className={`py-0.5 text-right text-[11px] tabular ${bold ? 'font-bold text-slate-900' : 'text-slate-800'}`}>{v}</td>
     </tr>
   )
 
   return (
-    <div ref={ref} className="w-[794px] bg-white p-10 text-slate-900" style={{ fontFamily: 'Inter, "Noto Sans Devanagari", Arial, sans-serif' }}>
+    <div ref={ref} className="flex min-h-[1123px] w-[794px] flex-col bg-white p-7 text-slate-900" style={{ fontFamily: 'Inter, "Noto Sans Devanagari", Arial, sans-serif' }}>
       {/* Header band */}
-      <div className="flex items-center justify-between border-b-4 border-postal-600 pb-4">
+      <div className="flex items-center justify-between border-b-4 border-postal-600 pb-3">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-postal-600 text-2xl font-black text-white">₹</div>
           <div>
@@ -58,7 +64,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       </div>
 
       {/* Parties */}
-      <div className="mt-4 grid grid-cols-2 gap-6">
+      <div className="mt-2 grid grid-cols-2 gap-6">
         <div className="rounded-lg bg-slate-50 p-3">
           <div className="text-[10px] font-bold uppercase tracking-wide text-slate-500">{t('pdf.for')}</div>
           <div className="text-base font-bold">{customerName.trim() || '________________________'}</div>
@@ -76,7 +82,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       </div>
 
       {/* Headline */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
+      <div className="mt-3 grid grid-cols-3 gap-3">
         <div className="rounded-lg border-2 border-postal-600 p-3">
           <div className="text-[10px] font-bold uppercase text-postal-700">
             {t('result.hero.title')}{gstApplies ? ` · ${t('result.hero.firstYear')}` : ''}
@@ -113,22 +119,23 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       </div>
 
       {/* Summary tables */}
-      <div className="mt-4 grid grid-cols-2 gap-6">
+      <div className="mt-3 grid grid-cols-2 gap-6">
         <div>
           <div className="mb-1 text-xs font-bold uppercase tracking-wide text-postal-700">{t('pdf.policySummary')}</div>
           <table className="w-full">
             <tbody>
               <Row k={t('plan.choose')} v={`${plan.name[lang]} (${plan.code})`} bold />
               <Row k={t('input.sumAssured')} v={formatINR(result.maturity.sumAssured)} bold />
+              <Row k={t('result.saWords')} v={amountInWords(result.maturity.sumAssured, lang)} />
               <Row k={t('result.term')} v={`${result.term} ${t('common.years')}`} />
               <Row k={t('result.premiumTerm')} v={`${result.premiumTerm} ${t('common.years')}`} />
               <Row k={t('result.maturityAge')} v={String(result.maturityAge)} />
               <Row k={t('input.paymentMode')} v={modeLabel} />
               <Row k={t('result.bonusRate')} v={t('result.bonusRateValue', { n: result.bonus.rate })} />
               <Row k={t('invest.bonus')} v={formatINR(result.bonus.total)} />
-              {result.bonus.terminal > 0 && <Row k={t('result.terminalBonus')} v={formatINR(result.bonus.terminal)} />}
+              {result.bonus.terminal > 0 && <Row k={t('result.terminalBonus').replace(/\s*\(.*\)$/, '')} v={formatINR(result.bonus.terminal)} />}
               <Row
-                k={t('loan.title')}
+                k={t('loan.title').replace(/\s*\(.*\)$/, '')}
                 v={
                   result.plan.surrenderAfterYears === null
                     ? t('loan.noneChild')
@@ -173,7 +180,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       </div>
 
       {/* Cashflow projection */}
-      <div className="mt-4">
+      <div className="mt-3">
         <div className="mb-1 text-xs font-bold uppercase tracking-wide text-postal-700">{t('pdf.cashflow')}</div>
         <div className="grid grid-cols-4 gap-2">
           <div className="rounded-lg bg-slate-50 p-2">
@@ -223,7 +230,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
       </div>
 
       {/* Year-wise table */}
-      <div className="mt-4">
+      <div className="mt-3">
         <div className="mb-1 text-xs font-bold uppercase tracking-wide text-postal-700">{t('pdf.yearTable')}</div>
         <table className="w-full text-[10px]">
           <thead>
@@ -239,8 +246,8 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
             </tr>
           </thead>
           <tbody className="tabular">
-            {result.years.map((r) => (
-              <tr key={r.year} className={`border-b border-slate-100 ${r.inflow ? 'bg-gold-50' : ''}`}>
+            {yearRows.map((r) => (
+              <tr key={r.year} className={`border-b border-slate-100 leading-tight ${r.inflow ? 'bg-gold-50' : ''}`}>
                 <td className="px-1.5 py-0.5 font-semibold">{r.year}</td>
                 <td className="px-1.5 py-0.5 text-slate-500">{r.age}</td>
                 <td className="px-1.5 py-0.5 text-right">{r.base ? formatINR(r.base) : '—'}</td>
@@ -255,8 +262,8 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
         </table>
       </div>
 
-      {/* Signatures */}
-      <div className="mt-8 grid grid-cols-2 gap-12">
+      {/* Signatures – pushed to the foot of the page */}
+      <div className="mt-auto grid grid-cols-2 gap-12 pt-6">
         <div className="border-t border-slate-400 pt-1 text-[10px] text-slate-500">{t('pdf.customerSign')}</div>
         <div className="border-t border-slate-400 pt-1 text-[10px] text-slate-500">{t('pdf.agentSign')}</div>
       </div>

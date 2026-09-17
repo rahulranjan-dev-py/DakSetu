@@ -16,6 +16,14 @@ export const en = {
   'theme.light': 'Light mode',
   'theme.dark': 'Dark mode',
 
+  'steps.scheme': 'Scheme',
+  'steps.customer': 'Customer',
+  'steps.details': 'Plan details',
+  'steps.of': 'Step {n} of {total}',
+  'form.next': 'Next',
+  'form.back': 'Back',
+  'result.saWords': 'Sum assured in words',
+  'fine.premium.short': 'Premium per instalment',
   'form.calculate': 'Calculate',
   'form.fixErrors': 'Fix the highlighted inputs to calculate',
   'results.edit': 'Edit inputs',
@@ -278,7 +286,7 @@ export const en = {
 
   'wa.greeting': 'Namaste {name}!',
   'wa.body':
-    'Official quotation for India Post {plan} ({product}):\n• Sum Assured: {sa}\n• Monthly saving: {premium}{gstNote}\n• Policy term: {term} years\n• Total receipt on maturity: {maturity}{moneyback}\n• Life cover from day 1: {sa} + bonus\n\nA secure future with Government of India guarantee.\n\nContact: {agent}',
+    'Official quotation for India Post {plan} ({product}):\n• Sum Assured: {sa} ({saWords})\n• Monthly saving: {premium}{gstNote}\n• Policy term: {term} years\n• Total receipt on maturity: {maturity}{moneyback}\n• Life cover from day 1: {sa} + bonus\n\nA secure future with Government of India guarantee.\n\nContact: {agent}',
   'wa.moneyback': '\n• Money-back instalments: {list}',
   'wa.gstNote': ' (1st yr incl. GST)',
   'wa.gstExempt': ' (no GST)',

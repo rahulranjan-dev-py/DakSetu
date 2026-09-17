@@ -63,26 +63,26 @@ export function FineCalculator() {
               onChange={(e) => setPremium(Math.max(0, parseInt(e.target.value || '0', 10)))}
             />
           </div>
+          <div>
+            <Label htmlFor="fine-due">{t('fine.dueDate')}</Label>
+            <Input id="fine-due" type="month" value={dueMonth} onChange={(e) => setDueMonth(e.target.value)} />
+          </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="fine-due">{t('fine.dueDate')}</Label>
-              <Input id="fine-due" type="month" value={dueMonth} onChange={(e) => setDueMonth(e.target.value)} />
-            </div>
             <div>
               <Label htmlFor="fine-paid">{t('fine.payDate')}</Label>
               <Input id="fine-paid" type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
             </div>
-          </div>
-          <div>
-            <Label htmlFor="fine-inst">{t('fine.instalments')}</Label>
-            <Input
-              id="fine-inst"
-              type="number"
-              inputMode="numeric"
-              value={instalments}
-              min={1}
-              onChange={(e) => setInstalments(Math.max(1, parseInt(e.target.value || '1', 10)))}
-            />
+            <div>
+              <Label htmlFor="fine-inst">{t('fine.instalments')}</Label>
+              <Input
+                id="fine-inst"
+                type="number"
+                inputMode="numeric"
+                value={instalments}
+                min={1}
+                onChange={(e) => setInstalments(Math.max(1, parseInt(e.target.value || '1', 10)))}
+              />
+            </div>
           </div>
           <div className="flex items-center justify-between rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5">
             <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('fine.over3')}</span>
