@@ -1,5 +1,6 @@
 import { Minus, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useDraftNumber } from '@/hooks/useDraftNumber.ts'
 
 interface Props {
   id?: string
@@ -15,6 +16,7 @@ interface Props {
 /** Numeric input with large −/+ touch targets (replaces sliders on the field form). */
 export function Stepper({ id, value, onChange, min, max, step = 1, className, ...rest }: Props) {
   const clamp = (v: number) => Math.min(max, Math.max(min, v))
+  const draft = useDraftNumber(value, onChange, clamp)
   return (
     <div className={cn('flex h-11 items-stretch overflow-hidden rounded-xl border border-input bg-white shadow-sm dark:bg-slate-900', className)}>
       <button
@@ -30,15 +32,13 @@ export function Stepper({ id, value, onChange, min, max, step = 1, className, ..
         id={id}
         type="number"
         inputMode="numeric"
-        value={value}
+        value={draft.text}
         min={min}
         max={max}
         step={step}
-        onChange={(e) => {
-          const n = parseInt(e.target.value, 10)
-          if (!Number.isNaN(n)) onChange(n)
-        }}
-        onBlur={() => onChange(clamp(value))}
+        onChange={(e) => draft.onChange(e.target.value)}
+        onBlur={draft.onBlur}
+        onFocus={draft.onFocus}
         className="w-full min-w-0 border-x border-input bg-transparent text-center text-lg font-bold tabular focus:outline-none"
         aria-label={rest['aria-label']}
       />

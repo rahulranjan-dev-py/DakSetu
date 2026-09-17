@@ -84,7 +84,7 @@ export function App() {
   const r = c.result
 
   return (
-    <div className="min-h-screen pb-24 md:pb-8">
+    <div className={cn('min-h-screen md:pb-8', screen === 'calculator' && step === 'form' ? 'pb-52' : 'pb-24')}>
       <Header onOpenAgent={() => setAgentOpen(true)} theme={theme} onToggleTheme={toggleTheme} />
       <PwaBanner />
 
@@ -102,7 +102,7 @@ export function App() {
 
         {/* ───────────── Step 1: input form ───────────── */}
         {screen === 'calculator' && step === 'form' && (
-          <div className="mx-auto max-w-3xl space-y-3 pb-20 md:pb-0">
+          <div className="mx-auto max-w-3xl space-y-3">
             <div className="grid grid-cols-2 gap-2">
               {(['PLI', 'RPLI'] as const).map((p) => {
                 const active = c.state.product === p

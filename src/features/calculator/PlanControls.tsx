@@ -11,6 +11,7 @@ import { formatINR, formatShortINR } from '@/domain/format.ts'
 import type { PaymentMode } from '@/domain/types.ts'
 import { useI18n } from '@/i18n'
 import { cn } from '@/lib/utils'
+import { useDraftNumber } from '@/hooks/useDraftNumber.ts'
 import type { CalculatorController } from './state.ts'
 
 const MODES: PaymentMode[] = ['monthly', 'quarterly', 'halfYearly', 'yearly']
@@ -24,6 +25,11 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
   const { state, set, result } = c
   const plan = result.plan
   const termRange = plan.term.type === 'termRange' ? plan.term : null
+  const saDraft = useDraftNumber(
+    state.sumAssured,
+    (n) => set('sumAssured', Math.min(99_999_999, n)),
+    (n) => Math.min(plan.maxSA, Math.max(plan.minSA, Math.round(n / plan.saStep) * plan.saStep)),
+  )
   const isChild = plan.kind === 'CHILD'
   const isJoint = !!plan.joint
   const presets = SA_PRESETS.filter((v) => v >= plan.minSA && v <= plan.maxSA)
@@ -118,15 +124,13 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
           inputMode="numeric"
           prefix="₹"
           className="text-lg font-bold"
-          value={state.sumAssured}
+          value={saDraft.text}
           step={plan.saStep}
           min={plan.minSA}
           max={plan.maxSA}
-          onChange={(e) => {
-            const n = parseInt(e.target.value, 10)
-            set('sumAssured', Number.isNaN(n) ? 0 : Math.min(99_999_999, n))
-          }}
-          onBlur={() => set('sumAssured', Math.min(plan.maxSA, Math.max(plan.minSA, Math.round(state.sumAssured / plan.saStep) * plan.saStep)))}
+          onChange={(e) => saDraft.onChange(e.target.value)}
+          onBlur={saDraft.onBlur}
+          onFocus={saDraft.onFocus}
         />
         <div className="mt-1 flex justify-between text-[11px] text-slate-400">
           <span>{formatINR(plan.minSA)}</span>
