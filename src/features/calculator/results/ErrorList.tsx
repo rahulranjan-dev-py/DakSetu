@@ -7,7 +7,7 @@ export function ErrorList({ issues }: { issues: ValidationIssue[] }) {
   const { t } = useI18n()
   if (!issues.length) return null
   return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+    <div className="rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 p-4 text-sm text-red-800 dark:text-red-200">
       <div className="mb-1 flex items-center gap-2 font-bold">
         <AlertCircle size={16} /> {t('error.fix')}
       </div>

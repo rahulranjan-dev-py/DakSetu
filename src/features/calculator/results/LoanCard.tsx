@@ -22,7 +22,7 @@ export function LoanCard({ result }: { result: CalcResult }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-slate-600">{t('loan.noneChild')}</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">{t('loan.noneChild')}</p>
         </CardContent>
       </Card>
     )
@@ -45,7 +45,7 @@ export function LoanCard({ result }: { result: CalcResult }) {
       <CardContent>
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-[11px] uppercase tracking-wide text-slate-500">
+            <tr className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
               <th className="py-1 text-left font-semibold">{t('loan.year')}</th>
               <th className="py-1 text-right font-semibold">{t('loan.surrender')}</th>
               {loanAllowed && (
@@ -55,15 +55,15 @@ export function LoanCard({ result }: { result: CalcResult }) {
           </thead>
           <tbody className="tabular">
             {shown.map((r) => (
-              <tr key={r.year} className="border-t border-slate-100">
-                <td className="py-1.5 font-semibold text-slate-700">{r.year}</td>
-                <td className="py-1.5 text-right text-slate-700">{formatINR(r.surrenderValue)}</td>
-                {loanAllowed && <td className="py-1.5 text-right font-bold text-emerald-700">{formatINR(r.loanValue)}</td>}
+              <tr key={r.year} className="border-t border-slate-100 dark:border-slate-800">
+                <td className="py-1.5 font-semibold text-slate-700 dark:text-slate-300">{r.year}</td>
+                <td className="py-1.5 text-right text-slate-700 dark:text-slate-300">{formatINR(r.surrenderValue)}</td>
+                {loanAllowed && <td className="py-1.5 text-right font-bold text-emerald-700 dark:text-emerald-300">{formatINR(r.loanValue)}</td>}
               </tr>
             ))}
           </tbody>
         </table>
-        <p className="mt-2 text-[11px] text-slate-400">
+        <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
           {loanAllowed ? `${t('loan.interest', { pct: CONFIG.loan.interestRate * 100 })} · ` : ''}
           {t('loan.note')}
         </p>

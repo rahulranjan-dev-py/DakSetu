@@ -50,13 +50,13 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
     <div
       className={cn(
         'flex flex-col gap-2 rounded-xl border p-3',
-        ok ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50',
+        ok ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60',
       )}
     >
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">{t(`product.${product}.full`)}</div>
-          <div className={cn('flex items-center gap-1 text-lg font-bold', ok ? 'text-emerald-700' : 'text-slate-500')}>
+          <div className="text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">{t(`product.${product}.full`)}</div>
+          <div className={cn('flex items-center gap-1 text-lg font-bold', ok ? 'text-emerald-700 dark:text-emerald-300' : 'text-slate-500 dark:text-slate-400')}>
             {ok ? <CircleCheck size={18} /> : <CircleX size={18} />}
             {ok ? t('elig.eligible') : t('elig.notEligible')}
           </div>
@@ -67,7 +67,7 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
           </Button>
         )}
       </div>
-      <p className="text-xs text-slate-600">{reason}</p>
+      <p className="text-xs text-slate-600 dark:text-slate-400">{reason}</p>
     </div>
   )
 
@@ -111,17 +111,17 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
               columns={2}
             />
           </div>
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5">
             <div>
-              <div className="text-sm font-semibold text-slate-800">{t('elig.operativeAccount')}</div>
-              <div className="text-[11px] text-slate-500">{t('elig.operativeAccountHint')}</div>
+              <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('elig.operativeAccount')}</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400">{t('elig.operativeAccountHint')}</div>
             </div>
             <Switch checked={hasOperativeAccount} onCheckedChange={setHasOperativeAccount} aria-label={t('elig.operativeAccount')} />
           </div>
-          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 px-3 py-2.5">
             <div>
-              <div className="text-sm font-semibold text-slate-800">{t('elig.ageProof')}</div>
-              <div className="text-[11px] text-slate-500">{t('elig.ageProofHint')}</div>
+              <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">{t('elig.ageProof')}</div>
+              <div className="text-[11px] text-slate-500 dark:text-slate-400">{t('elig.ageProofHint')}</div>
             </div>
             <Switch checked={standardAgeProof} onCheckedChange={setStandardAgeProof} aria-label={t('elig.ageProof')} />
           </div>
@@ -145,7 +145,7 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
                   : t(`elig.reason.${r.rpliReason}`)
             }
           />
-          {r.pli && r.rpli && <p className="rounded-xl bg-gold-50 p-3 text-xs text-gold-800">{t('elig.both')}</p>}
+          {r.pli && r.rpli && <p className="rounded-xl bg-gold-50 dark:bg-gold-900/20 p-3 text-xs text-gold-800 dark:text-gold-300">{t('elig.both')}</p>}
         </CardContent>
       </Card>
     </div>

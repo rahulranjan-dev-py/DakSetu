@@ -3,6 +3,17 @@
  * Both libraries are lazily imported so they never block first paint.
  */
 export async function elementToPdf(element: HTMLElement, filename: string): Promise<void> {
+  const pdf = await elementToPdfDoc(element)
+  pdf.save(filename)
+}
+
+/** Same rendering, returned as a Blob (for the Web Share API). */
+export async function elementToPdfBlob(element: HTMLElement): Promise<Blob> {
+  const pdf = await elementToPdfDoc(element)
+  return pdf.output('blob')
+}
+
+async function elementToPdfDoc(element: HTMLElement) {
   const [{ jsPDF }, { default: html2canvas }] = await Promise.all([import('jspdf'), import('html2canvas')])
 
   const canvas = await html2canvas(element, {
@@ -30,5 +41,5 @@ export async function elementToPdf(element: HTMLElement, filename: string): Prom
     pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH)
     heightLeft -= pageH
   }
-  pdf.save(filename)
+  return pdf
 }

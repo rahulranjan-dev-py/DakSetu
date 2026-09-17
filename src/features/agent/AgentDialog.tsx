@@ -47,7 +47,7 @@ export function AgentDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserCog className="text-postal-600" size={20} /> {t('agent.title')}
+            <UserCog className="text-postal-600 dark:text-postal-300" size={20} /> {t('agent.title')}
           </DialogTitle>
           <DialogDescription>{t('agent.hint')}</DialogDescription>
         </DialogHeader>

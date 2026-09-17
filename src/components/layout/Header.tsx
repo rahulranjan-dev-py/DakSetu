@@ -1,11 +1,13 @@
-import { Languages, Mail, UserCog, WifiOff } from 'lucide-react'
+import { Languages, Mail, Moon, Sun, UserCog, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useI18n } from '@/i18n'
 import { useOnline } from '@/hooks/useOnline.ts'
+import type { Theme } from '@/hooks/useTheme.ts'
 
-export function Header({ onOpenAgent }: { onOpenAgent: () => void }) {
+export function Header({ onOpenAgent, theme, onToggleTheme }: { onOpenAgent: () => void; theme: Theme; onToggleTheme: () => void }) {
   const { t, toggle } = useI18n()
   const online = useOnline()
+  const iconBtn = 'h-9 w-9 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white'
   return (
     <header className="hero-gradient sticky top-0 z-40 text-white shadow-hero">
       <div className="container flex h-14 items-center justify-between gap-2">
@@ -24,22 +26,13 @@ export function Header({ onOpenAgent }: { onOpenAgent: () => void }) {
               <WifiOff size={12} /> {t('app.offline')}
             </span>
           )}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-9 rounded-full bg-white/10 px-3 text-white hover:bg-white/20 hover:text-white"
-            onClick={toggle}
-            aria-label="Toggle language"
-          >
-            <Languages /> {t('lang.toggle')}
+          <Button variant="ghost" size="sm" className="h-9 rounded-full bg-white/10 px-2.5 text-white hover:bg-white/20 hover:text-white sm:px-3" onClick={toggle} aria-label="Toggle language">
+            <Languages /> <span className="hidden sm:inline">{t('lang.toggle')}</span>
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white"
-            onClick={onOpenAgent}
-            aria-label={t('agent.title')}
-          >
+          <Button variant="ghost" size="icon" className={iconBtn} onClick={onToggleTheme} aria-label={t('theme.toggle')} title={theme === 'dark' ? t('theme.light') : t('theme.dark')}>
+            {theme === 'dark' ? <Sun /> : <Moon />}
+          </Button>
+          <Button variant="ghost" size="icon" className={iconBtn} onClick={onOpenAgent} aria-label={t('agent.title')}>
             <UserCog />
           </Button>
         </div>

@@ -45,10 +45,10 @@ function Bar({
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between">
-        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{title}</span>
         <span className={cn('tabular text-lg font-extrabold', accent)}>{formatINR(total)}</span>
       </div>
-      <div className="h-7 w-full rounded-md bg-slate-100">
+      <div className="h-7 w-full rounded-md bg-slate-100 dark:bg-slate-800">
         <div className="flex h-full gap-[2px] overflow-hidden rounded-md" style={{ width: `${Math.max(widthPct, 2)}%` }}>
           {segments
             .filter((s) => s.value > 0)
@@ -70,11 +70,11 @@ function Bar({
             ))}
         </div>
       </div>
-      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-600">
+      <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-600 dark:text-slate-400">
         {segments.filter((s) => s.value > 0).map((s) => (
           <span key={s.key} className="flex items-center gap-1">
             <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: COLORS[s.key] }} />
-            {s.label} <span className="tabular font-semibold text-slate-800">{formatShortINR(s.value, lang)}</span>
+            {s.label} <span className="tabular font-semibold text-slate-800 dark:text-slate-200">{formatShortINR(s.value, lang)}</span>
           </span>
         ))}
       </div>
@@ -102,7 +102,7 @@ export function InvestmentChart({ result }: { result: CalcResult }) {
           total={pay}
           max={max}
           lang={lang}
-          accent="text-slate-900"
+          accent="text-slate-900 dark:text-slate-100"
           segments={[
             { key: 'premiums', label: t('invest.premiums'), value: result.totals.basePremiums },
             { key: 'gst', label: t('invest.gst'), value: result.totals.gst },
@@ -113,30 +113,30 @@ export function InvestmentChart({ result }: { result: CalcResult }) {
           total={get}
           max={max}
           lang={lang}
-          accent="text-postal-700"
+          accent="text-postal-700 dark:text-postal-300"
           segments={[
             { key: 'sa', label: t('invest.sa'), value: result.maturity.sumAssured },
             { key: 'bonus', label: t('invest.bonus'), value: result.bonus.total },
           ]}
         />
         {result.bonus.terminal > 0 && (
-          <p className="-mt-2 text-[11px] text-slate-500">{t('invest.terminalIncl', { amt: formatINR(result.bonus.terminal) })}</p>
+          <p className="-mt-2 text-[11px] text-slate-500 dark:text-slate-400">{t('invest.terminalIncl', { amt: formatINR(result.bonus.terminal) })}</p>
         )}
-        <div className="grid grid-cols-3 gap-2 border-t border-dashed border-slate-200 pt-3">
+        <div className="grid grid-cols-3 gap-2 border-t border-dashed border-slate-200 dark:border-slate-700 pt-3">
           <div>
-            <div className="text-[11px] text-slate-500">{t('invest.gain')}</div>
-            <div className="tabular text-sm font-bold text-emerald-700">{formatINR(result.maturity.netGain)}</div>
-            <div className="text-[10px] text-slate-400">{t('invest.times', { n: multiple.toFixed(2) })}</div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t('invest.gain')}</div>
+            <div className="tabular text-sm font-bold text-emerald-700 dark:text-emerald-300">{formatINR(result.maturity.netGain)}</div>
+            <div className="text-[10px] text-slate-400 dark:text-slate-500">{t('invest.times', { n: multiple.toFixed(2) })}</div>
           </div>
           <div>
-            <div className="text-[11px] text-slate-500">{t('invest.roi')}</div>
-            <div className="tabular text-sm font-bold text-slate-900">{formatPct(result.returns.roi, 0)}</div>
+            <div className="text-[11px] text-slate-500 dark:text-slate-400">{t('invest.roi')}</div>
+            <div className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">{formatPct(result.returns.roi, 0)}</div>
           </div>
           <div>
-            <div className="flex items-center gap-1 text-[11px] text-slate-500">
+            <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400">
               <TrendingUp size={11} /> {t('invest.irr')}
             </div>
-            <div className="tabular text-sm font-bold text-slate-900">
+            <div className="tabular text-sm font-bold text-slate-900 dark:text-slate-100">
               {result.returns.irr === null ? t('common.na') : formatPct(result.returns.irr, 2)}
             </div>
           </div>

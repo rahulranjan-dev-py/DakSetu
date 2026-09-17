@@ -34,12 +34,12 @@ export function Segmented<T extends string | number>({ value, onChange, options,
             className={cn(
               'flex min-h-11 flex-col items-center justify-center rounded-xl border px-2 py-1.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               active
-                ? 'border-postal-600 bg-postal-50 text-postal-700 shadow-sm'
-                : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50',
+                ? 'border-postal-600 bg-postal-50 dark:bg-postal-950/40 text-postal-700 dark:text-postal-300 shadow-sm'
+                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800',
             )}
           >
             <span className="tabular">{o.label}</span>
-            {o.hint && <span className={cn('text-[10px] font-medium', active ? 'text-postal-600' : 'text-slate-400')}>{o.hint}</span>}
+            {o.hint && <span className={cn('text-[10px] font-medium', active ? 'text-postal-600 dark:text-postal-300' : 'text-slate-400 dark:text-slate-500')}>{o.hint}</span>}
           </button>
         )
       })}
