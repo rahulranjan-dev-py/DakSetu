@@ -1,7 +1,7 @@
 import { IndianRupee, Sparkles } from 'lucide-react'
 import type { CalcResult, PremiumBreakdown } from '@/domain/engine.ts'
 import { CONFIG } from '@/domain/config.ts'
-import { formatINR } from '@/domain/format.ts'
+import { amountInWords, formatINR } from '@/domain/format.ts'
 import { useI18n } from '@/i18n'
 
 const PER_KEY = {
@@ -43,7 +43,7 @@ function Column({
 }
 
 export function HeroCard({ result }: { result: CalcResult }) {
-  const { t, l } = useI18n()
+  const { t, lang, l } = useI18n()
   const p = result.premium
   const gstApplies = CONFIG.gst.firstYear > 0 || CONFIG.gst.renewal > 0
 
@@ -108,7 +108,11 @@ export function HeroCard({ result }: { result: CalcResult }) {
             <span className="text-white/70">{t(PER_KEY[p.mode])}</span>
           </div>
         )}
-        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/80">
+        <div className="mt-3 text-[11px] text-white/80">
+          <span className="text-white/60">{t('input.sumAssured')}:</span> <span className="font-semibold text-white">{formatINR(result.maturity.sumAssured)}</span>
+          <span className="text-white/70"> · {amountInWords(result.maturity.sumAssured, lang)}</span>
+        </div>
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-white/80">
           <span className="flex items-center gap-1">
             <Sparkles size={12} className="text-gold-300" />
             {t('result.bonusRateValue', { n: result.bonus.rate })}

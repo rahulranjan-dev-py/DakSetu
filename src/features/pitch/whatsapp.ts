@@ -1,5 +1,5 @@
 import type { CalcResult } from '@/domain/engine.ts'
-import { formatINR } from '@/domain/format.ts'
+import { amountInWords, formatINR } from '@/domain/format.ts'
 import { CONFIG } from '@/domain/config.ts'
 import type { Lang } from '@/domain/types.ts'
 import { translate } from '@/i18n'
@@ -34,6 +34,7 @@ export function buildPitchMessage({ lang, result, customerName, agent }: PitchCo
     plan: plan.name[lang],
     product: plan.product,
     sa: formatINR(result.maturity.sumAssured),
+    saWords: amountInWords(result.maturity.sumAssured, lang),
     premium,
     term: result.term,
     maturity: formatINR(result.maturity.totalBenefit),

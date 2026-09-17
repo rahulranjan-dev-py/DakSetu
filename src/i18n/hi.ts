@@ -18,6 +18,14 @@ export const hi: Record<TranslationKey, string> = {
   'theme.light': 'लाइट मोड',
   'theme.dark': 'डार्क मोड',
 
+  'steps.scheme': 'योजना',
+  'steps.customer': 'ग्राहक',
+  'steps.details': 'प्लान विवरण',
+  'steps.of': 'चरण {n} / {total}',
+  'form.next': 'आगे',
+  'form.back': 'पीछे',
+  'result.saWords': 'बीमित राशि शब्दों में',
+  'fine.premium.short': 'प्रति किस्त प्रीमियम',
   'form.calculate': 'गणना करें',
   'form.fixErrors': 'गणना के लिए चिह्नित जानकारी ठीक करें',
   'results.edit': 'जानकारी बदलें',
@@ -280,7 +288,7 @@ export const hi: Record<TranslationKey, string> = {
 
   'wa.greeting': 'नमस्ते {name}!',
   'wa.body':
-    'India Post {plan} ({product}) का आधिकारिक कोटेशन:\n• सम एश्योर्ड: {sa}\n• मासिक बचत: {premium}{gstNote}\n• पॉलिसी अवधि: {term} वर्ष\n• मैच्योरिटी पर कुल प्राप्ति: {maturity}{moneyback}\n• पहले दिन से जीवन कवर: {sa} + बोनस\n\nसरकारी गारंटी के साथ सुरक्षित भविष्य।\n\nसंपर्क करें: {agent}',
+    'India Post {plan} ({product}) का आधिकारिक कोटेशन:\n• सम एश्योर्ड: {sa} ({saWords})\n• मासिक बचत: {premium}{gstNote}\n• पॉलिसी अवधि: {term} वर्ष\n• मैच्योरिटी पर कुल प्राप्ति: {maturity}{moneyback}\n• पहले दिन से जीवन कवर: {sa} + बोनस\n\nसरकारी गारंटी के साथ सुरक्षित भविष्य।\n\nसंपर्क करें: {agent}',
   'wa.moneyback': '\n• मनी-बैक किस्तें: {list}',
   'wa.gstNote': ' (पहला वर्ष, GST सहित)',
   'wa.gstExempt': ' (GST नहीं)',
