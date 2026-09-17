@@ -266,7 +266,9 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
         <span className="font-semibold">{t('disclaimer.title')}: </span>
         {t('disclaimer.body', { date: RATE_TABLE_META.generatedAt })}
       </p>
-      <p className="mt-1 text-center text-[9px] text-slate-400">{t('pdf.generatedBy')}</p>
+      <p className="mt-1 text-center text-[9px] text-slate-400">
+        {t('pdf.generatedBy')} · {t('app.developedBy')}: {t('app.developer')}
+      </p>
     </div>
   )
 })

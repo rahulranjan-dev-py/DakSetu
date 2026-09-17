@@ -1,7 +1,7 @@
 import type { TranslationKey } from './en.ts'
 
 export const hi: Record<TranslationKey, string> = {
-  'app.title': 'पोस्टल मित्र',
+  'app.title': 'डाकसेतु',
   'app.subtitle': 'इंडिया पोस्ट PLI व RPLI फ़ील्ड कैलकुलेटर',
   'app.tagline': 'सरकारी गारंटी वाली बचत। तुरंत कोटेशन। ऑफ़लाइन भी चलता है।',
   'app.offline': 'ऑफ़लाइन – सभी सुविधाएँ उपलब्ध',
@@ -9,8 +9,10 @@ export const hi: Record<TranslationKey, string> = {
   'app.updateAvailable': 'नया संस्करण तैयार है।',
   'app.reload': 'अभी अपडेट करें',
   'app.install': 'ऐप इंस्टॉल करें',
-  'app.installHint': 'एक टैप में ऑफ़लाइन उपयोग के लिए पोस्टल मित्र को होम स्क्रीन पर जोड़ें।',
+  'app.installHint': 'एक टैप में ऑफ़लाइन उपयोग के लिए डाकसेतु को होम स्क्रीन पर जोड़ें।',
   'app.dismiss': 'बंद करें',
+  'app.developedBy': 'विकसित',
+  'app.developer': 'राहुल रंजन, डाक सहायक, इंडिया पोस्ट, बोकारो स्टील सिटी, झारखंड',
   'lang.toggle': 'English',
 
   'nav.calculator': 'कैलकुलेटर',
@@ -269,7 +271,7 @@ export const hi: Record<TranslationKey, string> = {
   'wa.moneyback': '\n• मनी-बैक किस्तें: {list}',
   'wa.gstNote': ' (पहला वर्ष, GST सहित)',
   'wa.gstExempt': ' (GST नहीं)',
-  'wa.footer': 'कोटेशन पोस्टल मित्र से तैयार।',
+  'wa.footer': 'कोटेशन डाकसेतु से तैयार।',
 
   'pdf.title': 'प्रीमियम कोटेशन',
   'pdf.for': 'के लिए तैयार',
@@ -282,8 +284,8 @@ export const hi: Record<TranslationKey, string> = {
   'pdf.agentSign': 'एजेंट हस्ताक्षर व मुहर',
   'pdf.customerSign': 'ग्राहक हस्ताक्षर',
   'pdf.lifeAssured': 'बीमित की आयु',
-  'pdf.generatedBy': 'पोस्टल मित्र – इंडिया पोस्ट PLI/RPLI फ़ील्ड कैलकुलेटर द्वारा तैयार',
-  'pdf.filename': 'PostalMitra-Quote',
+  'pdf.generatedBy': 'डाकसेतु – इंडिया पोस्ट PLI/RPLI फ़ील्ड कैलकुलेटर द्वारा तैयार',
+  'pdf.filename': 'DakSetu-Quote',
 
   'common.years': 'वर्ष',
   'common.yrs': 'वर्ष',

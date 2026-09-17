@@ -3,7 +3,7 @@
  *
  * India Post publishes premium rate charts (per ₹1,000 sum assured, per month,
  * by age next birthday and term). The exact charts are periodically revised by
- * the Directorate of Postal Life Insurance. The tables shipped with Postal Mitra
+ * the Directorate of Postal Life Insurance. The tables shipped with DakSetu
  * are a calibrated actuarial baseline that reproduces the shape and level of the
  * standard charts; drop official values into `rate-overrides.ts` to replace any
  * cell with the exact published figure.

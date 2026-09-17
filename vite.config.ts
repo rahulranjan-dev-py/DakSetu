@@ -16,8 +16,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'fonts/*.woff2'],
       manifest: {
-        name: 'Postal Mitra – PLI & RPLI Calculator',
-        short_name: 'Postal Mitra',
+        name: 'DakSetu – PLI & RPLI Calculator',
+        short_name: 'DakSetu',
         description:
           'Offline-first India Post PLI & RPLI premium, bonus and maturity calculator for field staff.',
         lang: 'en-IN',

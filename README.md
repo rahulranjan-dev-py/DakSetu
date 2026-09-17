@@ -1,4 +1,4 @@
-# Postal Mitra – India Post PLI & RPLI Field Calculator
+# DakSetu – India Post PLI & RPLI Field Calculator
 
 A mobile-first, **offline-capable** Progressive Web App that lets India Post field staff
 (Sub Postmasters, Postal Assistants, GDS/BPMs, Direct Agents) quote **Postal Life Insurance (PLI)**
@@ -23,6 +23,8 @@ and **Rural Postal Life Insurance (RPLI)** policies in seconds – at the counte
 | PDF | `jsPDF` + `html2canvas` (lazy-loaded chunk) |
 | Offline | `vite-plugin-pwa` (Workbox, precache-everything, auto-update) |
 | Tests | Vitest (calculation engine) |
+
+**Developed by:** Rahul Ranjan, Postal Assistant, India Post, Bokaro Steel City, Jharkhand.
 
 **Live app:** https://rahulranjan-dev-py.github.io/PLI---RPLI---Calculator/ – every push to `main`
 builds the site and publishes it to the `gh-pages` branch via `.github/workflows/deploy.yml`.

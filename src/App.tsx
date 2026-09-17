@@ -119,8 +119,11 @@ export function App() {
         {screen === 'eligibility' && <EligibilityChecker onOpenCalculator={openCalculator} />}
       </main>
 
-      <footer className="container mt-8 text-center text-[11px] text-slate-400">
-        {t('app.tagline')}
+      <footer className="container mt-8 space-y-1 text-center text-[11px] text-slate-400">
+        <p>{t('app.tagline')}</p>
+        <p>
+          {t('app.developedBy')}: <span className="font-semibold text-slate-500">{t('app.developer')}</span>
+        </p>
       </footer>
 
       <BottomNav screen={screen} onChange={setScreen} onOpenAgent={() => setAgentOpen(true)} />
