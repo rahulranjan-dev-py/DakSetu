@@ -14,7 +14,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'fonts/*.woff2'],
+      includeAssets: ['favicon.png', 'icons/*.png', 'fonts/*.woff2'],
       manifest: {
         name: 'DakSetu – PLI & RPLI Calculator',
         short_name: 'DakSetu',

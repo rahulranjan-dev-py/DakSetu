@@ -36,9 +36,12 @@ export function PwaBanner() {
     return (
       <div className="container mt-3">
         <div className="flex items-center justify-between gap-3 rounded-xl border border-postal-200 dark:border-postal-800 bg-postal-50 dark:bg-postal-950/40 px-3 py-2 text-sm text-postal-900 dark:text-postal-100">
-          <span>
-            <span className="font-semibold">{t('app.install')}</span>
-            <span className="hidden sm:inline"> · {t('app.installHint')}</span>
+          <span className="flex min-w-0 items-center gap-2">
+            <img src={`${import.meta.env.BASE_URL}icons/icon-192.png`} alt="" width={32} height={32} className="h-8 w-8 shrink-0 rounded-lg" />
+            <span className="min-w-0">
+              <span className="font-semibold">{t('app.install')}</span>
+              <span className="hidden sm:inline"> · {t('app.installHint')}</span>
+            </span>
           </span>
           <div className="flex items-center gap-1">
             <Button size="sm" onClick={install}>
