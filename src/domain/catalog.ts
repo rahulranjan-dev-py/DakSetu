@@ -160,7 +160,8 @@ export const PLANS: PlanSpec[] = [
     maxSA: 300_000,
     saStep: 10_000,
     bonusRate: 52,
-    term: { type: 'termRange', min: 5, max: 20, default: 15 },
+    // Dak Sewa quotes a children policy maturing at the child's age 18 to 25
+    term: { type: 'maturityAge', options: [18, 19, 20, 21, 22, 23, 24, 25] },
     child: { minChildAge: 5, maxChildAge: 20, maxParentAge: 45 },
     loanAfterYears: null,
     surrenderAfterYears: null,
@@ -314,7 +315,8 @@ export const PLANS: PlanSpec[] = [
     maxSA: 100_000,
     saStep: 10_000,
     bonusRate: 48,
-    term: { type: 'termRange', min: 5, max: 20, default: 15 },
+    // Dak Sewa quotes a children policy maturing at the child's age 18 to 25
+    term: { type: 'maturityAge', options: [18, 19, 20, 21, 22, 23, 24, 25] },
     child: { minChildAge: 5, maxChildAge: 20, maxParentAge: 45 },
     loanAfterYears: null,
     surrenderAfterYears: null,

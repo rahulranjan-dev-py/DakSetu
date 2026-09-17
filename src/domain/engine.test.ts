@@ -17,10 +17,10 @@ describe('premium building blocks', () => {
     expect(saRebateFor(5_000_000, false)).toBe(0)
   })
 
-  it('reproduces every official Dak Sewa monthly tabular premium (9 ages, all plans and terms)', () => {
+  it('reproduces every official Dak Sewa monthly tabular premium (all quoted ages, plans and terms)', () => {
     let cells = 0
     for (const product of ['PLI', 'RPLI'] as const) {
-      for (const kind of ['EA', 'WLA', 'AEA'] as const) {
+      for (const kind of ['EA', 'WLA', 'AEA', 'CHILD'] as const) {
         for (const [key, series] of Object.entries(OFFICIAL_RATES[product][kind])) {
           for (const [age, rate] of Object.entries(series)) {
             const planId =
@@ -28,12 +28,15 @@ describe('premium building blocks', () => {
                 ? product === 'PLI' ? 'pli-santosh' : 'rpli-gram-santosh'
                 : kind === 'WLA'
                   ? product === 'PLI' ? 'pli-suraksha' : 'rpli-gram-suraksha'
-                  : +key === 10 ? 'rpli-gram-priya' : product === 'PLI' ? 'pli-sumangal' : 'rpli-gram-sumangal'
+                  : kind === 'CHILD'
+                    ? product === 'PLI' ? 'pli-bal-jeevan' : 'rpli-bal-jeevan'
+                    : +key === 10 ? 'rpli-gram-priya' : product === 'PLI' ? 'pli-sumangal' : 'rpli-gram-sumangal'
             const r = calculate({
               planId,
               age: +age,
               sumAssured: 100_000,
-              maturityAge: kind === 'EA' ? +key : undefined,
+              parentAge: kind === 'CHILD' ? 35 : undefined,
+              maturityAge: kind === 'EA' ? +key : kind === 'CHILD' ? +age + +key : undefined,
               ceasingAge: kind === 'WLA' ? +key : undefined,
               term: kind === 'AEA' ? +key : undefined,
               paymentMode: 'monthly',

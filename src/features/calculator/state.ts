@@ -111,7 +111,7 @@ export function useCalculator(): CalculatorController {
           conversionYear: d.conversionYear ?? 0,
           conversionMaturityAge: d.conversionMaturityAge ?? prev.conversionMaturityAge,
           // switching between adult and child plans: reset the age to something sensible
-          completedAge: isChild && !wasChild ? 9 : !isChild && wasChild ? 29 : prev.completedAge,
+          completedAge: isChild && !wasChild ? 10 : !isChild && wasChild ? 30 : prev.completedAge,
           ageMode: isChild !== wasChild ? 'age' : prev.ageMode,
         }
       })

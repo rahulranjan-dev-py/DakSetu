@@ -437,9 +437,9 @@ export function calculate(input: CalcInput): CalcResult {
       break
     }
     case 'CHILD': {
-      term = input.term ?? 15
+      maturityAge = input.maturityAge ?? defaultChildMaturityAge(plan, age)
+      term = Math.max(1, maturityAge - age)
       premiumTerm = term
-      maturityAge = age + term
       rate = childRate(plan.product, age, term, plan.bonusRate)
       break
     }
@@ -627,6 +627,13 @@ export function calculate(input: CalcInput): CalcResult {
   }
 }
 
+/** Children policy: the maturity age closest to a 15-year term within the plan's options. */
+export function defaultChildMaturityAge(plan: PlanSpec, childAge: number): number {
+  const options = plan.term.type === 'maturityAge' ? plan.term.options : [25]
+  const target = childAge + 15
+  return options.reduce((best, o) => (Math.abs(o - target) < Math.abs(best - target) ? o : best), options[0])
+}
+
 /** Sensible default inputs for a plan. */
 export function defaultInputFor(plan: PlanSpec, base?: Partial<CalcInput>): CalcInput {
   const isChild = plan.kind === 'CHILD'
@@ -643,7 +650,11 @@ export function defaultInputFor(plan: PlanSpec, base?: Partial<CalcInput>): Calc
   if (isChild) input.parentAge = input.parentAge ?? 35
   switch (plan.term.type) {
     case 'maturityAge':
-      input.maturityAge = plan.term.options.includes(input.maturityAge ?? -1) ? input.maturityAge : 60
+      input.maturityAge = plan.term.options.includes(input.maturityAge ?? -1)
+        ? input.maturityAge
+        : isChild
+          ? defaultChildMaturityAge(plan, age)
+          : 60
       break
     case 'ceasingAge':
       input.ceasingAge = plan.term.options.includes(input.ceasingAge ?? -1) ? input.ceasingAge : 60

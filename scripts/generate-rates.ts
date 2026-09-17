@@ -23,7 +23,7 @@ import {
 } from '../src/domain/actuarial/model.ts'
 import { PLANS } from '../src/domain/catalog.ts'
 import type { PlanSpec, Product } from '../src/domain/types.ts'
-import { anchoredRate, endowmentByTerm, interpolateByTerm, roundRate } from '../src/domain/rates/official-anchors.ts'
+import { anchoredRate, endowmentByTerm, interpolateByTerm, officialSeries, roundRate } from '../src/domain/rates/official-anchors.ts'
 
 const REF_AGE = 29
 
@@ -101,13 +101,24 @@ function buildAEA(plans: PlanSpec[], a: ActuarialAssumptions): Table {
 
 function buildChild(plan: PlanSpec, a: ActuarialAssumptions): Table {
   const table: Table = {}
-  if (plan.term.type !== 'termRange' || !plan.child) return table
-  for (let term = plan.term.min; term <= plan.term.max; term++) {
+  if (plan.term.type !== 'maturityAge' || !plan.child) return table
+  const { minChildAge, maxChildAge } = plan.child
+  const terms = new Set<number>()
+  for (const maturityAge of plan.term.options)
+    for (let age = minChildAge; age <= maxChildAge; age++) if (maturityAge - age >= 5) terms.add(maturityAge - age)
+  for (const term of [...terms].sort((x, y) => x - y)) {
     table[String(term)] = {}
-    for (let age = plan.child.minChildAge; age <= plan.child.maxChildAge; age++) {
-      // No official child rates in hand: scale by the endowment rates for the same term
-      const model = grossMonthlyRatePer1000(childSpec(age, term, plan.bonusRate, a), a)
-      table[String(term)][String(age)] = roundRate(plan.product, model * endowmentTermFactor(plan.product, term, plan.bonusRate, a))
+    // Official Dak Sewa children-policy rates depend on the term only; the
+    // quoted child ages are used verbatim and the ages between are interpolated.
+    const series = officialSeries(plan.product, 'CHILD', term)
+    for (let age = minChildAge; age <= maxChildAge; age++) {
+      if (age + term < plan.term.options[0] || age + term > plan.term.options[plan.term.options.length - 1]) continue
+      if (series) {
+        table[String(term)][String(age)] = Math.round(interpolateByTerm(series, age) * 100) / 100
+      } else {
+        const model = grossMonthlyRatePer1000(childSpec(age, term, plan.bonusRate, a), a)
+        table[String(term)][String(age)] = roundRate(plan.product, model * endowmentTermFactor(plan.product, term, plan.bonusRate, a))
+      }
     }
   }
   return table
@@ -132,7 +143,7 @@ const output = {
     generatedAt: new Date().toISOString().slice(0, 10),
     unit: 'Monthly premium (₹) per ₹1,000 sum assured, by age next birthday',
     note:
-      'Official Dak Sewa app quotations (official-rates.json) at ages 19, 22, 25, 29, 35, 40, 45, 50, 55 are used verbatim; the actuarial model interpolates the ages in between. Override individual cells in rate-overrides.ts with further official figures.',
+      'Official Dak Sewa app quotations (official-rates.json) at ages 19, 22, 25, 29, 35, 40, 45, 50, 55 (children policy: child ages 5, 8, 10, 12, 15, 18, 20) are used verbatim; the actuarial model interpolates the ages in between. Override individual cells in rate-overrides.ts with further official figures.',
     assumptions: { PLI: PLI_ASSUMPTIONS, RPLI: RPLI_ASSUMPTIONS },
   },
   PLI: buildProduct('PLI', PLI_ASSUMPTIONS),
