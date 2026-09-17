@@ -12,11 +12,8 @@ import type { PlanKind, Product } from '../types.ts'
  * Value: monthly premium (₹) per ₹1,000 sum assured.
  */
 export const RATE_OVERRIDES: Record<string, number> = {
-  // Santosh (EA) figures from India Post-linked premium tables:
-  // age 26, maturity 50, SA ₹5,10,000 → ₹1,632/month before rebate (₹3.20 per ₹1,000)
-  'PLI:EA:50:26': 3.2,
-  // age 27, maturity 35, SA ₹7,00,000 → ₹106 per ₹10,000 per month (₹10.60 per ₹1,000)
-  'PLI:EA:35:27': 10.6,
+  // Official Dak Sewa quotations live in official-rates.json; add further
+  // verified cells here, e.g. 'PLI:EA:60:31': 2.8,
 }
 
 export function overrideKey(

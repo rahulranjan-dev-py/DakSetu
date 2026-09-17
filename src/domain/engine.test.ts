@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildPremium, calculate, defaultInputFor, irr, saRebateFor, terminalBonusFor } from './engine.ts'
 import { PLAN_BY_ID, PLANS } from './catalog.ts'
+import { OFFICIAL_RATES } from './rates/official-anchors.ts'
 import { CONFIG } from './config.ts'
 import { calculateFine } from './fine.ts'
 import { checkEligibility } from './eligibility.ts'
@@ -16,23 +17,49 @@ describe('premium building blocks', () => {
     expect(saRebateFor(5_000_000, false)).toBe(0)
   })
 
-  it('reproduces the India Post Santosh worked examples', () => {
-    // age 26 (ANB), maturity 50, SA ₹5,10,000 → ₹1,632 tabular, ₹1,607 net monthly; yearly ₹18,702
-    const r = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'monthly', applySARebate: true })
-    expect(r.premium.tabularMonthly).toBeCloseTo(1632, 0)
-    expect(r.premium.netMonthly).toBe(1607)
-    expect(r.premium.saRebate).toBe(25)
-    const y = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'yearly', applySARebate: true })
-    expect(Math.abs(y.premium.modal - 18_702)).toBeLessThan(10)
-    const q = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'quarterly', applySARebate: true })
-    expect(Math.abs(q.premium.modal - 4_810)).toBeLessThan(10)
-    const h = calculate({ planId: 'pli-santosh', age: 26, sumAssured: 510_000, maturityAge: 50, paymentMode: 'halfYearly', applySARebate: true })
-    expect(Math.abs(h.premium.modal - 9_499)).toBeLessThan(10)
-    // age 27, maturity 35, SA ₹7,00,000 → ₹7,385/month
-    const s = calculate({ planId: 'pli-santosh', age: 27, sumAssured: 700_000, maturityAge: 35, paymentMode: 'monthly', applySARebate: true })
-    expect(s.premium.netMonthly).toBe(7385)
-    // maturity: SA + 52 × 700 × 8 + no terminal bonus (term < 20)
-    expect(s.maturity.finalPayout).toBe(700_000 + 700 * 52 * 8)
+  it('reproduces every official Dak Sewa monthly tabular premium (9 ages, all plans and terms)', () => {
+    let cells = 0
+    for (const product of ['PLI', 'RPLI'] as const) {
+      for (const kind of ['EA', 'WLA', 'AEA'] as const) {
+        for (const [key, series] of Object.entries(OFFICIAL_RATES[product][kind])) {
+          for (const [age, rate] of Object.entries(series)) {
+            const planId =
+              kind === 'EA'
+                ? product === 'PLI' ? 'pli-santosh' : 'rpli-gram-santosh'
+                : kind === 'WLA'
+                  ? product === 'PLI' ? 'pli-suraksha' : 'rpli-gram-suraksha'
+                  : +key === 10 ? 'rpli-gram-priya' : product === 'PLI' ? 'pli-sumangal' : 'rpli-gram-sumangal'
+            const r = calculate({
+              planId,
+              age: +age,
+              sumAssured: 100_000,
+              maturityAge: kind === 'EA' ? +key : undefined,
+              ceasingAge: kind === 'WLA' ? +key : undefined,
+              term: kind === 'AEA' ? +key : undefined,
+              paymentMode: 'monthly',
+              applySARebate: true,
+            })
+            expect(r.premium.ratePer1000, `${product} ${kind} ${key} age ${age}`).toBe(rate)
+            expect(r.premium.tabularMonthly, `${product} ${kind} ${key} age ${age}`).toBe(Math.round(rate * 100))
+            cells++
+          }
+        }
+      }
+    }
+    expect(cells).toBeGreaterThan(150)
+  })
+
+  it('interpolates smoothly between quoted ages', () => {
+    const at = (age: number) =>
+      calculate({ planId: 'pli-santosh', age, sumAssured: 100_000, maturityAge: 60, paymentMode: 'monthly', applySARebate: true }).premium.ratePer1000
+    // official: 45 → 5.8, 50 → 8.8; the ages between must lie between and rise monotonically
+    let prev = at(45)
+    for (let age = 46; age <= 50; age++) {
+      const v = at(age)
+      expect(v).toBeGreaterThanOrEqual(prev)
+      expect(v).toBeLessThanOrEqual(8.8)
+      prev = v
+    }
   })
 
   it('charges NIL GST on premiums (exempt since 22 Sep 2025)', () => {

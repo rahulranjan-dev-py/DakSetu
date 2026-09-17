@@ -11,6 +11,7 @@ import {
   wholeLifeSpec,
 } from '../actuarial/model.ts'
 import type { MoneyBackStep } from '../types.ts'
+import { endowmentByTerm, interpolateByTerm, roundRate } from './official-anchors.ts'
 
 type Table = Record<string, Record<string, number>>
 type TabulatedKind = Exclude<PlanKind, 'JOINT' | 'CWLA'>
@@ -69,8 +70,17 @@ export function childRate(product: Product, childAge: number, term: number, bonu
   return lookup(product, 'CHILD', term, childAge) ?? grossMonthlyRatePer1000(childSpec(childAge, term, bonusRate, a), a)
 }
 
-/** Monthly premium per ₹1,000 SA for joint life (Yugal Suraksha) – computed on the fly. */
+/**
+ * Monthly premium per ₹1,000 SA for joint life (Yugal Suraksha) – computed on
+ * the fly and scaled by the official endowment rates for the same term.
+ */
 export function jointLifeRate(product: Product, age1: number, age2: number, term: number, bonusRate: number): number {
   const a = assumptionsFor(product)
-  return grossMonthlyRatePer1000(jointLifeSpec(age1, age2, term, bonusRate, a), a)
+  const official = endowmentByTerm(product, 29)
+  const ratios: Record<number, number> = {}
+  for (const t of Object.keys(official).map(Number)) {
+    ratios[t] = official[t] / grossMonthlyRatePer1000(endowmentSpec(29, t, bonusRate), a)
+  }
+  const model = grossMonthlyRatePer1000(jointLifeSpec(age1, age2, term, bonusRate, a), a)
+  return roundRate(product, model * interpolateByTerm(ratios, term))
 }
