@@ -11,7 +11,7 @@ import {
   wholeLifeSpec,
 } from '../actuarial/model.ts'
 import type { MoneyBackStep } from '../types.ts'
-import { endowmentByTerm, interpolateByTerm, roundRate } from './official-anchors.ts'
+import { anchoredRate, endowmentByTerm, interpolateByTerm, officialSeries, roundRate } from './official-anchors.ts'
 
 type Table = Record<string, Record<string, number>>
 type TabulatedKind = Exclude<PlanKind, 'JOINT' | 'CWLA'>
@@ -70,12 +70,24 @@ export function childRate(product: Product, childAge: number, term: number, bonu
   return lookup(product, 'CHILD', term, childAge) ?? grossMonthlyRatePer1000(childSpec(childAge, term, bonusRate, a), a)
 }
 
+/** Dak Sewa rates a joint-life policy on the rounded average of the two ages. */
+export function jointEffectiveAge(age1: number, age2: number): number {
+  return Math.round((age1 + age2) / 2)
+}
+
 /**
- * Monthly premium per ₹1,000 SA for joint life (Yugal Suraksha) – computed on
- * the fly and scaled by the official endowment rates for the same term.
+ * Monthly premium per ₹1,000 SA for joint life (Yugal Suraksha), keyed by the
+ * effective age. Official Dak Sewa cells are used verbatim; other effective
+ * ages take the actuarial model scaled by the official/model ratio.
  */
 export function jointLifeRate(product: Product, age1: number, age2: number, term: number, bonusRate: number): number {
   const a = assumptionsFor(product)
+  const eff = jointEffectiveAge(age1, age2)
+  const modelAt = (x: number) => grossMonthlyRatePer1000(jointLifeSpec(x, x, term, bonusRate, a), a)
+  if (officialSeries(product, 'JOINT', term)) {
+    const anchored = anchoredRate(product, 'JOINT', term, eff, modelAt)
+    if (anchored !== undefined) return anchored
+  }
   const official = endowmentByTerm(product, 29)
   const ratios: Record<number, number> = {}
   for (const t of Object.keys(official).map(Number)) {

@@ -29,6 +29,8 @@ export const CONFIG: Config = {
     baseAmount: 1,
     step: 20_000,
     amountPerStep: 1,
+    /** Joint life (Yugal Suraksha): Dak Sewa quotes ₹7 on ₹1,00,000 instead of ₹5 – verified at ₹1,00,000 only */
+    jointMultiplier: 1.4,
   },
   /**
    * Modal premiums as quoted by the Dak Sewa app (age 29, all plans, SA ₹1L/₹5L):

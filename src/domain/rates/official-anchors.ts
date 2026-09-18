@@ -11,11 +11,12 @@ import type { Product } from '../types.ts'
  *   AEA → keyed by policy term (10 = Gram Priya, 15/20 = Sumangal)
  *   CHILD → keyed by policy term, then the child's age (Bal Jeevan Bima; the
  *           rate depends on the term only and is the same for PLI and RPLI)
+ *   JOINT → keyed by policy term, then the effective age (Yugal Suraksha, PLI only)
  *
  * The rate generator uses these values verbatim at the quoted ages and lets the
  * actuarial model interpolate the ages in between (see scripts/generate-rates.ts).
  */
-export type AnchorKind = 'EA' | 'WLA' | 'AEA' | 'CHILD'
+export type AnchorKind = 'EA' | 'WLA' | 'AEA' | 'CHILD' | 'JOINT'
 type Series = Record<string, number>
 
 export const OFFICIAL_RATES = officialRates as unknown as {
