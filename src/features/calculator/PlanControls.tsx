@@ -6,7 +6,7 @@ import { Segmented } from '@/components/ui/segmented'
 import { Select } from '@/components/ui/select'
 import { Stepper } from '@/components/ui/stepper'
 import { CONFIG, SA_PRESETS } from '@/domain/config.ts'
-import { modeDiscount } from '@/domain/engine.ts'
+import { jointTermRange, modeDiscount } from '@/domain/engine.ts'
 import { formatINR, formatShortINR } from '@/domain/format.ts'
 import type { PaymentMode } from '@/domain/types.ts'
 import { useI18n } from '@/i18n'
@@ -183,10 +183,14 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
             id="term"
             value={state.term}
             onValueChange={(v) => set('term', Number(v))}
-            options={Array.from({ length: termRange.max - termRange.min + 1 }, (_, i) => termRange.min + i).map((v) => ({
-              value: v,
-              label: t('input.years', { n: v }),
-            }))}
+            options={(() => {
+              const r = plan.joint ? jointTermRange(c.anb, c.spouseAnb) : termRange
+              const lo = Math.max(termRange.min, r.min), hi = Math.min(termRange.max, r.max)
+              return Array.from({ length: Math.max(0, hi - lo + 1) }, (_, i) => lo + i).map((v) => ({
+                value: v,
+                label: `${t('input.years', { n: v })}${plan.joint ? ` · ${t('result.maturityAge')} ${Math.round((c.anb + c.spouseAnb) / 2) + v}` : ''}`,
+              }))
+            })()}
           />
         </div>
       )}

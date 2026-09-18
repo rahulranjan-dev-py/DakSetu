@@ -1,7 +1,7 @@
 import { CONFIG } from './config.ts'
 import { PLAN_BY_ID } from './catalog.ts'
 import type { PaymentMode, PlanId, PlanSpec, Product } from './types.ts'
-import { anticipatedRate, childRate, endowmentRate, jointLifeRate, wholeLifeRate } from './rates/index.ts'
+import { anticipatedRate, childRate, endowmentRate, jointEffectiveAge, jointLifeRate, wholeLifeRate } from './rates/index.ts'
 import { WHOLE_LIFE_MATURITY_AGE } from './actuarial/assumptions.ts'
 import { interpolateByTerm } from './rates/official-anchors.ts'
 
@@ -185,10 +185,16 @@ const r2 = (n: number) => Math.round(n * 100) / 100
  * High sum assured rebate: ₹1/month once SA reaches ₹40,000, plus ₹1/month for
  * every further ₹20,000 tier (Post Office Life Insurance Rules).
  */
-export function saRebateFor(sumAssured: number, apply: boolean): number {
+export function saRebateFor(sumAssured: number, apply: boolean, multiplier = 1): number {
   const c = CONFIG.saRebate
   if (!apply || !c.enabled || sumAssured < c.minSA) return 0
-  return c.baseAmount + Math.floor((sumAssured - c.minSA) / c.step) * c.amountPerStep
+  return Math.round((c.baseAmount + Math.floor((sumAssured - c.minSA) / c.step) * c.amountPerStep) * multiplier)
+}
+
+/** Joint life: term must mature between age 35 and 60 on the effective age, within 5–20 years. */
+export function jointTermRange(age1: number, age2: number): { min: number; max: number } {
+  const eff = jointEffectiveAge(age1, age2)
+  return { min: Math.max(5, 35 - eff), max: Math.min(20, 60 - eff) }
 }
 
 /**
@@ -242,9 +248,10 @@ export function buildPremium(
   product: Product = 'PLI',
   term = 20,
   loadingPct = 0,
+  saRebateMultiplier = 1,
 ): PremiumBreakdown {
   const baseMonthly = r0((ratePer1000 * sumAssured) / 1000)
-  const saRebate = Math.min(saRebateFor(sumAssured, applySARebate), Math.max(0, baseMonthly - 1))
+  const saRebate = Math.min(saRebateFor(sumAssured, applySARebate, saRebateMultiplier), Math.max(0, baseMonthly - 1))
   const modeMultiplier = CONFIG.modeMultiplier[mode]
   const { tabularModal: baseModal, discountPct: modeRebatePct } = tabularModalFor(product, mode, term, baseMonthly, sumAssured)
   // Loading (e.g. RPLI non-standard age proof +5 %) applies to the tabular premium, rounded to the rupee
@@ -327,6 +334,11 @@ export function validate(plan: PlanSpec, input: CalcInput): ValidationIssue[] {
     const s = input.spouseAge ?? 0
     if (s < plan.minAge || s > plan.maxAge)
       issues.push({ code: 'SPOUSE_AGE_RANGE', params: { min: plan.minAge, max: plan.maxAge } })
+    else {
+      const { min, max } = jointTermRange(age, s)
+      const term = input.term ?? 0
+      if (term < min || term > max) issues.push({ code: 'TERM_RANGE', params: { min, max } })
+    }
   }
 
   if (sumAssured < plan.minSA) issues.push({ code: 'SA_MIN', params: { min: plan.minSA } })
@@ -358,7 +370,7 @@ export function validate(plan: PlanSpec, input: CalcInput): ValidationIssue[] {
     }
     case 'termRange': {
       const term = input.term ?? 0
-      if (term < plan.term.min || term > plan.term.max)
+      if (!plan.joint && (term < plan.term.min || term > plan.term.max))
         issues.push({ code: 'TERM_RANGE', params: { min: plan.term.min, max: plan.term.max } })
       break
     }
@@ -432,7 +444,8 @@ export function calculate(input: CalcInput): CalcResult {
     case 'JOINT': {
       term = input.term ?? 20
       premiumTerm = term
-      maturityAge = age + term
+      // Dak Sewa states the maturity age on the effective (average) age of the two lives
+      maturityAge = jointEffectiveAge(age, input.spouseAge ?? age) + term
       rate = jointLifeRate(plan.product, age, input.spouseAge ?? age, term, plan.bonusRate)
       break
     }
@@ -446,7 +459,8 @@ export function calculate(input: CalcInput): CalcResult {
   }
 
   const loading = plan.product === 'RPLI' && input.nonStandardAgeProof ? CONFIG.rpliNonStandardAgeProof.loading : 0
-  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product, premiumTerm, loading)
+  const rebateMultiplier = plan.kind === 'JOINT' ? CONFIG.saRebate.jointMultiplier : 1
+  const premium = buildPremium(rate, SA, paymentMode, applySARebate, plan.product, premiumTerm, loading, rebateMultiplier)
   const premiumAfterConversion =
     conversionYear > 0
       ? buildPremium(rateAfterConversion, SA, paymentMode, applySARebate, plan.product, term - conversionYear, loading)

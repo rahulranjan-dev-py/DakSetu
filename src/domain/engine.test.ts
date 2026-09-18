@@ -20,8 +20,8 @@ describe('premium building blocks', () => {
   it('reproduces every official Dak Sewa monthly tabular premium (all quoted ages, plans and terms)', () => {
     let cells = 0
     for (const product of ['PLI', 'RPLI'] as const) {
-      for (const kind of ['EA', 'WLA', 'AEA', 'CHILD'] as const) {
-        for (const [key, series] of Object.entries(OFFICIAL_RATES[product][kind])) {
+      for (const kind of ['EA', 'WLA', 'AEA', 'CHILD', 'JOINT'] as const) {
+        for (const [key, series] of Object.entries(OFFICIAL_RATES[product][kind] ?? {})) {
           for (const [age, rate] of Object.entries(series)) {
             const planId =
               kind === 'EA'
@@ -30,26 +30,42 @@ describe('premium building blocks', () => {
                   ? product === 'PLI' ? 'pli-suraksha' : 'rpli-gram-suraksha'
                   : kind === 'CHILD'
                     ? product === 'PLI' ? 'pli-bal-jeevan' : 'rpli-bal-jeevan'
-                    : +key === 10 ? 'rpli-gram-priya' : product === 'PLI' ? 'pli-sumangal' : 'rpli-gram-sumangal'
+                    : kind === 'JOINT'
+                      ? 'pli-yugal-suraksha'
+                      : +key === 10 ? 'rpli-gram-priya' : product === 'PLI' ? 'pli-sumangal' : 'rpli-gram-sumangal'
             const r = calculate({
               planId,
               age: +age,
               sumAssured: 100_000,
               parentAge: kind === 'CHILD' ? 35 : undefined,
+              spouseAge: kind === 'JOINT' ? +age : undefined,
               maturityAge: kind === 'EA' ? +key : kind === 'CHILD' ? +age + +key : undefined,
               ceasingAge: kind === 'WLA' ? +key : undefined,
-              term: kind === 'AEA' ? +key : undefined,
+              term: kind === 'AEA' || kind === 'JOINT' ? +key : undefined,
               paymentMode: 'monthly',
               applySARebate: true,
             })
             expect(r.premium.ratePer1000, `${product} ${kind} ${key} age ${age}`).toBe(rate)
             expect(r.premium.tabularMonthly, `${product} ${kind} ${key} age ${age}`).toBe(Math.round(rate * 100))
+            if (kind === 'JOINT') expect(r.premium.modal, `joint net ${key} age ${age}`).toBe(Math.round(rate * 100) - 7)
             cells++
           }
         }
       }
     }
     expect(cells).toBeGreaterThan(150)
+  })
+
+  it('rates a joint-life policy on the rounded average age (Dak Sewa effective age)', () => {
+    // Quoted: ages 30 + 25 → effective 28, 7-year term → ₹1,360 tabular, ₹1,353 net, maturity age 35
+    const r = calculate({ planId: 'pli-yugal-suraksha', age: 30, spouseAge: 25, sumAssured: 100_000, term: 7, paymentMode: 'monthly', applySARebate: true })
+    expect(r.issues).toEqual([])
+    expect(r.premium.tabularMonthly).toBe(1360)
+    expect(r.premium.modal).toBe(1353)
+    expect(r.maturityAge).toBe(35)
+    // 30 + 35 → effective 33: a 5-year term matures at 38 (quoted ₹1,910); a 2-year gap to 35 is not allowed at 21 + 21
+    expect(calculate({ planId: 'pli-yugal-suraksha', age: 30, spouseAge: 35, sumAssured: 100_000, term: 5, paymentMode: 'monthly', applySARebate: true }).premium.tabularMonthly).toBe(1910)
+    expect(calculate({ planId: 'pli-yugal-suraksha', age: 21, spouseAge: 21, sumAssured: 100_000, term: 10, paymentMode: 'monthly', applySARebate: true }).issues.map((i) => i.code)).toContain('TERM_RANGE')
   })
 
   it('interpolates smoothly between quoted ages', () => {

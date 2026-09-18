@@ -85,7 +85,7 @@ export interface Config {
     exemptFrom: string
     legacy: { firstYear: number; renewal: number }
   }
-  saRebate: { enabled: boolean; minSA: number; baseAmount: number; step: number; amountPerStep: number }
+  saRebate: { enabled: boolean; minSA: number; baseAmount: number; step: number; amountPerStep: number; jointMultiplier: number }
   /**
    * How the official quarterly / half-yearly / yearly tabular premium relates to
    * monthly × instalments (from Dak Sewa quotations):
