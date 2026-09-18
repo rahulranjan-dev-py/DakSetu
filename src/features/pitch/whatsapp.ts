@@ -52,3 +52,10 @@ export function whatsappUrl(message: string, phone?: string): string {
   const base = normalised ? `https://wa.me/${normalised}` : 'https://wa.me/'
   return `${base}?text=${encodeURIComponent(message)}`
 }
+
+/** Opens the chat with a number (no pre-filled text); without a number WhatsApp shows its contact picker. */
+export function whatsappChatUrl(phone?: string): string {
+  const digits = (phone ?? '').replace(/\D/g, '')
+  const normalised = digits.length === 10 ? `91${digits}` : digits
+  return normalised ? `https://wa.me/${normalised}` : 'https://wa.me/'
+}

@@ -254,7 +254,7 @@ export function App() {
                 </div>
               </div>
               <ResultsDashboard result={r}>
-                <ShareBar result={r} customerName={c.state.customerName} customerMobile={c.state.customerMobile} agent={agent} onDownloadPdf={downloadPdf} onMakePdf={makePdf} />
+                <ShareBar result={r} customerName={c.state.customerName} customerMobile={c.state.customerMobile} agent={agent} onDownloadPdf={downloadPdf} onMakePdf={makePdf} pdfFileName={pdfName()} />
               </ResultsDashboard>
             </div>
           </div>

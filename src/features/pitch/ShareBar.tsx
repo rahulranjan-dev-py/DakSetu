@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Check, Copy, FileDown, Loader2, MessageCircle, Paperclip } from 'lucide-react'
+import { Check, Copy, FileDown, Loader2, MessageCircle, Paperclip, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Segmented } from '@/components/ui/segmented'
@@ -7,7 +7,7 @@ import type { CalcResult } from '@/domain/engine.ts'
 import type { Lang } from '@/domain/types.ts'
 import { useI18n } from '@/i18n'
 import type { AgentProfile } from '@/features/agent/agent.ts'
-import { buildPitchMessage, whatsappUrl } from './whatsapp.ts'
+import { buildPitchMessage, whatsappChatUrl, whatsappUrl } from './whatsapp.ts'
 
 export function ShareBar({
   result,
@@ -16,6 +16,7 @@ export function ShareBar({
   agent,
   onDownloadPdf,
   onMakePdf,
+  pdfFileName,
 }: {
   result: CalcResult
   customerName: string
@@ -24,12 +25,14 @@ export function ShareBar({
   onDownloadPdf: (lang: Lang) => Promise<void>
   /** Builds the PDF and returns it as a File (for the Web Share API) */
   onMakePdf: (lang: Lang) => Promise<File>
+  /** Name the downloaded PDF is saved under (shown in the dual-app instructions) */
+  pdfFileName: string
 }) {
   const { t, lang } = useI18n()
   const [msgLang, setMsgLang] = useState<Lang>(lang)
   useEffect(() => setMsgLang(lang), [lang])
   const [copied, setCopied] = useState(false)
-  const [busy, setBusy] = useState<'pdf' | 'share' | null>(null)
+  const [busy, setBusy] = useState<'pdf' | 'share' | 'dual' | null>(null)
   const [note, setNote] = useState<string | null>(null)
   const disabled = result.issues.length > 0
 
@@ -62,6 +65,24 @@ export function ShareBar({
       // No file sharing (desktop browsers): download the PDF instead
       await onDownloadPdf(msgLang)
       setNote(t('share.pdfShareFallback'))
+    } catch (e) {
+      console.error(e)
+      setNote(t('share.pdfError'))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  // Cloned / dual-app WhatsApp runs as another Android user and cannot read a file
+  // handed over by the browser (it arrives as "Untitled"). Save the PDF to Downloads
+  // instead and open the chat, so it can be attached from storage.
+  const dualApp = async () => {
+    setBusy('dual')
+    setNote(null)
+    try {
+      await onDownloadPdf(msgLang)
+      setNote(t('share.dualSteps', { file: pdfFileName }))
+      window.open(whatsappChatUrl(customerMobile), '_blank', 'noopener')
     } catch (e) {
       console.error(e)
       setNote(t('share.pdfError'))
@@ -124,6 +145,9 @@ export function ShareBar({
           <span className="text-[11px] font-medium opacity-90">{t('share.whatsappPdf')}</span>
         </Button>
         <p className="col-span-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">{hasNumber ? t('share.howTo') : t('share.noNumber')}</p>
+        <Button variant="outline" size="sm" onClick={dualApp} disabled={disabled || busy !== null} className="col-span-2 h-auto min-h-9 whitespace-normal py-1.5 text-xs">
+          {busy === 'dual' ? <Loader2 className="animate-spin" /> : <Smartphone />} {busy === 'dual' ? t('share.generating') : t('share.dualApp')}
+        </Button>
         <Button variant="default" size="lg" onClick={pdf} disabled={disabled || busy !== null} className="min-w-0 px-2 text-sm sm:px-4 sm:text-base">
           {busy === 'pdf' ? <Loader2 className="animate-spin" /> : <FileDown />} {busy === 'pdf' ? t('share.generating') : t('share.pdf')}
         </Button>
