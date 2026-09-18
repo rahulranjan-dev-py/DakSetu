@@ -35,8 +35,15 @@ export function ShareBar({
 
   const message = buildPitchMessage({ lang: msgLang, result, customerName, agent })
 
+  const digits = customerMobile.replace(/\D/g, '')
+  const hasNumber = digits.length >= 10
+  const prettyNumber = digits.length === 10 ? `${digits.slice(0, 5)} ${digits.slice(5)}` : customerMobile
+
+  // Opens the customer's chat directly (works for unsaved numbers) with the message pre-filled.
   const shareText = () => window.open(whatsappUrl(message, customerMobile), '_blank', 'noopener')
 
+  // WhatsApp ignores text when a file is shared, and the share sheet cannot target a
+  // number, so the PDF goes as step 2 after the chat exists from step 1.
   const sharePdf = async () => {
     setBusy('share')
     setNote(null)
@@ -45,15 +52,15 @@ export function ShareBar({
       const canShareFiles = typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })
       if (canShareFiles) {
         try {
-          await navigator.share({ files: [file], text: message, title: file.name })
+          await navigator.share({ files: [file], title: file.name })
+          setNote(t('share.dualAppNote'))
           return
         } catch (e) {
           if ((e as DOMException).name === 'AbortError') return
         }
       }
-      // No file sharing (desktop browsers): download the PDF and open WhatsApp with the text
+      // No file sharing (desktop browsers): download the PDF instead
       await onDownloadPdf(msgLang)
-      shareText()
       setNote(t('share.pdfShareFallback'))
     } catch (e) {
       console.error(e)
@@ -104,12 +111,19 @@ export function ShareBar({
         </div>
       </CardHeader>
       <CardContent className="grid grid-cols-2 gap-2">
-        <Button variant="whatsapp" size="lg" onClick={sharePdf} disabled={disabled || busy !== null} className="col-span-2 sm:col-span-1">
-          {busy === 'share' ? <Loader2 className="animate-spin" /> : <Paperclip />} {busy === 'share' ? t('share.generating') : t('share.whatsappPdf')}
+        <Button variant="whatsapp" size="lg" onClick={shareText} disabled={disabled} className="col-span-2 h-auto min-h-12 flex-col gap-0 py-2 sm:col-span-1">
+          <span className="flex items-center gap-2">
+            <MessageCircle /> {t('share.step1')}
+          </span>
+          <span className="text-[11px] font-medium opacity-90">{hasNumber ? t('share.toNumber', { n: `+91 ${prettyNumber}` }) : t('share.whatsapp')}</span>
         </Button>
-        <Button variant="whatsapp" size="lg" onClick={shareText} disabled={disabled} className="col-span-2 sm:col-span-1">
-          <MessageCircle /> {t('share.whatsapp')}
+        <Button variant="whatsapp" size="lg" onClick={sharePdf} disabled={disabled || busy !== null} className="col-span-2 h-auto min-h-12 flex-col gap-0 py-2 sm:col-span-1">
+          <span className="flex items-center gap-2">
+            {busy === 'share' ? <Loader2 className="animate-spin" /> : <Paperclip />} {busy === 'share' ? t('share.generating') : t('share.step2')}
+          </span>
+          <span className="text-[11px] font-medium opacity-90">{t('share.whatsappPdf')}</span>
         </Button>
+        <p className="col-span-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">{hasNumber ? t('share.howTo') : t('share.noNumber')}</p>
         <Button variant="default" size="lg" onClick={pdf} disabled={disabled || busy !== null} className="min-w-0 px-2 text-sm sm:px-4 sm:text-base">
           {busy === 'pdf' ? <Loader2 className="animate-spin" /> : <FileDown />} {busy === 'pdf' ? t('share.generating') : t('share.pdf')}
         </Button>
