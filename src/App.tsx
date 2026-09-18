@@ -57,7 +57,7 @@ export function App() {
 
   const downloadPdf = useCallback(async (l: Lang) => elementToPdf(await prepareSheet(l), pdfName()), [prepareSheet, c.state.customerName, c.result.plan.name.en, t]) // eslint-disable-line react-hooks/exhaustive-deps
   const makePdf = useCallback(
-    async (l: Lang) => new File([await elementToPdfBlob(await prepareSheet(l))], pdfName(), { type: 'application/pdf' }),
+    async (l: Lang) => new File([await elementToPdfBlob(await prepareSheet(l))], pdfName(), { type: 'application/pdf', lastModified: Date.now() }),
     [prepareSheet, c.state.customerName, c.result.plan.name.en, t], // eslint-disable-line react-hooks/exhaustive-deps
   )
 
@@ -190,7 +190,7 @@ export function App() {
               </>
             )}
 
-            {step === 'customer' && <CustomerCard c={c} />}
+            {step === 'customer' && <CustomerCard c={c} onNext={nextStep} />}
 
             {step === 'details' && (
               <>
