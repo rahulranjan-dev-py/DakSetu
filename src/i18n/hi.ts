@@ -191,6 +191,8 @@ export const hi: Record<TranslationKey, string> = {
   'share.howTo': 'चरण 1 ग्राहक की WhatsApp चैट संदेश के साथ खोलता है (नंबर सेव करने की ज़रूरत नहीं)। चरण 2 शेयर शीट खोलता है: WhatsApp चुनें, फिर ग्राहक की चैट – चरण 1 के बाद वह सबसे ऊपर होती है।',
   'share.dualAppNote': 'यदि PDF "Untitled" के रूप में जाए, तो इसे अपने मुख्य WhatsApp से भेजें, क्लोन / डुअल-ऐप WhatsApp से नहीं।',
   'share.noNumber': 'सीधे भेजने के लिए ग्राहक का WhatsApp मोबाइल नंबर (फ़ॉर्म का चरण 2) भरें।',
+  'share.dualApp': 'क्लोन / डुअल WhatsApp? PDF सेव करें और चैट खोलें',
+  'share.dualSteps': 'PDF आपके Downloads में "{file}" नाम से सेव हो गया। WhatsApp चैट में अटैच (📎) → Document → Downloads में जाकर वह फ़ाइल चुनें।',
   'share.title': 'पिच टूल्स',
   'share.whatsapp': 'WhatsApp टेक्स्ट',
   'share.whatsappPdf': 'WhatsApp PDF',

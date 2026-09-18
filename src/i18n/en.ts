@@ -189,6 +189,8 @@ export const en = {
   'share.howTo': 'Step 1 opens the customer\'s WhatsApp chat with the message (no need to save the number). Step 2 opens the share sheet: choose WhatsApp, then the customer\'s chat, which is at the top after step 1.',
   'share.dualAppNote': 'If the PDF arrives as "Untitled", share it with your main WhatsApp, not a cloned / dual-app WhatsApp.',
   'share.noNumber': 'Add the customer\'s WhatsApp mobile number (step 2 of the form) to send directly to them.',
+  'share.dualApp': 'Using a cloned / dual WhatsApp? Save PDF & open chat',
+  'share.dualSteps': 'PDF saved to your Downloads as "{file}". In the WhatsApp chat tap the attach (📎) icon → Document → Downloads and pick that file.',
   'share.title': 'Pitch tools',
   'share.whatsapp': 'WhatsApp text',
   'share.whatsappPdf': 'WhatsApp PDF',
