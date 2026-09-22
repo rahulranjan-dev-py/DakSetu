@@ -54,6 +54,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.documentElement.lang = lang === 'hi' ? 'hi' : 'en'
+    document.title = translate(lang, 'app.docTitle')
   }, [lang])
 
   const value = useMemo<I18n>(

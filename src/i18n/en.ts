@@ -1,5 +1,6 @@
 export const en = {
   'app.title': 'DakSetu',
+  'app.docTitle': 'DakSetu – PLI & RPLI Calculator',
   'app.subtitle': 'India Post PLI & RPLI Field Calculator',
   'app.tagline': 'Government-backed savings. Instant quotes. Works offline.',
   'app.offline': 'Offline – all features available',
@@ -255,6 +256,7 @@ export const en = {
   'fine.lapsed': 'Policy has lapsed (unpaid for {n}+ months). Revival needs arrears with interest and a medical certificate.',
   'fine.rule': 'Lapse rule: 6 unpaid months if policy < 3 yrs old, 12 months if ≥ 3 yrs.',
 
+  'elig.planCaps': 'Plan-specific entry ages also apply: Suvidha / Gram Suvidha up to 50, Sumangal / Gram Sumangal, Gram Priya and Yugal Suraksha up to 45 (Sumangal 20-year up to 40).',
   'elig.title': 'Eligibility checker',
   'elig.desc': 'Check whether a customer can buy PLI or RPLI.',
   'elig.age': 'Customer age',

@@ -80,7 +80,9 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
           <CardTitle>
             <ShieldQuestion size={14} /> {t('elig.title')}
           </CardTitle>
-          <CardDescription>{t('elig.desc')}</CardDescription>
+          <CardDescription>
+            {t('elig.desc')} {t('elig.planCaps')}
+          </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3">
           <div>
