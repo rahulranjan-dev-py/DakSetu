@@ -5,6 +5,9 @@
   "author": "Rahul Ranjan, Postal Assistant, India Post, Bokaro Steel City, Jharkhand",
   "description": "DakSetu - India Post PLI & RPLI Field Calculator (offline-first PWA)",
   "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -17,7 +20,6 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
-    "@radix-ui/react-slider": "^1.4.7",
     "@radix-ui/react-slot": "^1.3.3",
     "@radix-ui/react-switch": "^1.3.7",
     "@radix-ui/react-tabs": "^1.1.21",
