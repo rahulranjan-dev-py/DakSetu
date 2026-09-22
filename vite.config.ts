@@ -2,6 +2,23 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
+import type { Plugin } from 'vite'
+
+/**
+ * Content-Security-Policy as a meta tag (GitHub Pages cannot send headers).
+ * Build-only: the dev server injects inline HMR / React-refresh scripts.
+ * img-src data:/blob: and style-src 'unsafe-inline' are needed by html2canvas + jsPDF.
+ */
+export const CSP =
+  "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+
+function cspMeta(): Plugin {
+  return {
+    name: 'daksetu-csp-meta',
+    apply: 'build',
+    transformIndexHtml: (html) => html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`),
+  }
+}
 
 // Base public path. GitHub Pages serves project sites from a sub-path, so the
 // deploy workflow sets VITE_BASE=/<repo>/ ; local dev and root-hosted deploys use '/'.
@@ -12,10 +29,12 @@ export default defineConfig({
   base,
   plugins: [
     react(),
+    cspMeta(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'icons/*.png', 'fonts/*.woff2'],
+      includeAssets: ['favicon.png', 'icons/*.png', 'theme-init.js'],
       manifest: {
+        id: base,
         name: 'DakSetu – PLI & RPLI Calculator',
         short_name: 'DakSetu',
         description:
