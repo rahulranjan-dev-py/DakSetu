@@ -36,7 +36,9 @@ export function AgentDialog({
         id={`agent-${key}`}
         value={draft[key]}
         placeholder={placeholder}
-        onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
+        onChange={(e) => setDraft({ ...draft, [key]: e.target.value.slice(0, key === 'office' ? 80 : key === 'mobile' ? 13 : 60) })}
+        onBlur={(e) => setDraft({ ...draft, [key]: e.target.value.trim() })}
+        maxLength={key === 'office' ? 80 : key === 'mobile' ? 13 : 60}
         {...extra}
       />
     </div>

@@ -230,6 +230,10 @@ export const en = {
   'agent.save': 'Save',
   'agent.saved': 'Saved on this device',
 
+  'fine.dueAfterPay': 'The payment date is before the due month – check the dates.',
+  'fine.instalmentsCapped': 'Only {n} instalment(s) can be due by the payment date – calculated for {n}.',
+  'app.updated': 'DakSetu has been updated to the latest version.',
+  'result.maturityAgeJoint': 'Maturity age (on effective age {eff})',
   'fine.title': 'Late fee (default fee) calculator',
   'fine.desc': 'Default fee is ₹1 per ₹100 of premium (or part thereof) for every month of default.',
   'fine.premium': 'Premium per instalment (₹)',

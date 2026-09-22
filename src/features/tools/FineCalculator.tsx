@@ -8,6 +8,7 @@ import { StatRow } from '@/components/ui/stat'
 import { calculateFine, monthsBetween } from '@/domain/fine.ts'
 import { formatINR } from '@/domain/format.ts'
 import { useI18n } from '@/i18n'
+import { useDraftNumber } from '@/hooks/useDraftNumber.ts'
 import { cn } from '@/lib/utils'
 
 function ym(d: Date) {
@@ -24,19 +25,24 @@ export function FineCalculator() {
   const [instalments, setInstalments] = useState(3)
   const [over3, setOver3] = useState(true)
 
-  const months = useMemo(() => {
+  const { months, dueAfterPay } = useMemo(() => {
     const due = new Date(dueMonth + '-01T00:00:00')
     const paid = new Date(payDate + 'T00:00:00')
-    if (Number.isNaN(due.getTime()) || Number.isNaN(paid.getTime())) return 0
-    return monthsBetween(due, paid)
+    if (Number.isNaN(due.getTime()) || Number.isNaN(paid.getTime())) return { months: 0, dueAfterPay: false }
+    const dueAfterPay = due.getFullYear() * 12 + due.getMonth() > paid.getFullYear() * 12 + paid.getMonth()
+    return { months: monthsBetween(due, paid), dueAfterPay }
   }, [dueMonth, payDate])
+  const maxInstalments = Math.max(1, months + 1)
+  const effectiveInstalments = Math.min(instalments, maxInstalments)
+  const premiumDraft = useDraftNumber(premium, (n) => setPremium(Math.max(0, n)), (n) => Math.max(0, Math.min(99_999_999, n)))
+  const instDraft = useDraftNumber(instalments, (n) => setInstalments(Math.max(1, n)), (n) => Math.max(1, Math.min(600, n)))
 
   const fine = useMemo(
     () =>
       calculateFine({
         premium,
         monthsOverdue: months,
-        instalmentsDue: Math.min(instalments, Math.max(1, months + 1)),
+        instalmentsDue: effectiveInstalments,
         policyOverThreeYears: over3,
       }),
     [premium, months, instalments, over3],
@@ -59,8 +65,10 @@ export function FineCalculator() {
               type="number"
               inputMode="numeric"
               prefix="₹"
-              value={premium}
-              onChange={(e) => setPremium(Math.max(0, parseInt(e.target.value || '0', 10)))}
+              value={premiumDraft.text}
+              onChange={(e) => premiumDraft.onChange(e.target.value)}
+              onBlur={premiumDraft.onBlur}
+              onFocus={premiumDraft.onFocus}
             />
           </div>
           <div>
@@ -78,9 +86,12 @@ export function FineCalculator() {
                 id="fine-inst"
                 type="number"
                 inputMode="numeric"
-                value={instalments}
+                value={instDraft.text}
                 min={1}
-                onChange={(e) => setInstalments(Math.max(1, parseInt(e.target.value || '1', 10)))}
+                max={maxInstalments}
+                onChange={(e) => instDraft.onChange(e.target.value)}
+                onBlur={instDraft.onBlur}
+                onFocus={instDraft.onFocus}
               />
             </div>
           </div>
@@ -92,8 +103,17 @@ export function FineCalculator() {
         </CardContent>
       </Card>
 
-      <Card className={cn(fine.lapsed ? 'border-red-300 dark:border-red-700' : 'border-emerald-200 dark:border-emerald-800')}>
+      <Card className={cn(dueAfterPay ? 'border-amber-300 dark:border-amber-700' : fine.lapsed ? 'border-red-300 dark:border-red-700' : 'border-emerald-200 dark:border-emerald-800')}>
         <CardContent className="pt-4">
+          {dueAfterPay && (
+            <div className="mb-3 flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-900/20 dark:text-amber-200" role="alert">
+              <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+              <span>{t('fine.dueAfterPay')}</span>
+            </div>
+          )}
+          {!dueAfterPay && instalments > maxInstalments && (
+            <p className="mb-3 rounded-lg bg-slate-50 p-2 text-[11px] text-slate-600 dark:bg-slate-800/60 dark:text-slate-300">{t('fine.instalmentsCapped', { n: maxInstalments })}</p>
+          )}
           <div
             className={cn(
               'mb-3 flex items-start gap-2 rounded-xl p-3 text-sm',
