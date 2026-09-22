@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch'
 import { checkEligibility, type Occupation, type Residence } from '@/domain/eligibility.ts'
 import type { Product } from '@/domain/types.ts'
 import { useI18n } from '@/i18n'
+import { useDraftNumber } from '@/hooks/useDraftNumber.ts'
 import { cn } from '@/lib/utils'
 
 const OCCUPATIONS: Occupation[] = [
@@ -36,6 +37,7 @@ const OCCUPATIONS: Occupation[] = [
 export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p: Product) => void }) {
   const { t } = useI18n()
   const [age, setAge] = useState(30)
+  const ageDraft = useDraftNumber(age, (n) => setAge(Math.max(0, n)), (n) => Math.max(0, Math.min(120, n)))
   const [occupation, setOccupation] = useState<Occupation>('centralGovt')
   const [residence, setResidence] = useState<Residence>('urban')
   const [hasOperativeAccount, setHasOperativeAccount] = useState(false)
@@ -87,8 +89,10 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
               id="elig-age"
               type="number"
               inputMode="numeric"
-              value={age}
-              onChange={(e) => setAge(Math.max(0, parseInt(e.target.value || '0', 10)))}
+              value={ageDraft.text}
+              onChange={(e) => ageDraft.onChange(e.target.value)}
+              onBlur={ageDraft.onBlur}
+              onFocus={ageDraft.onFocus}
             />
           </div>
           <div>

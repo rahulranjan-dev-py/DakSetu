@@ -42,9 +42,15 @@ export function App() {
   const sheetRef = useRef<HTMLDivElement>(null)
 
   const quoteRef = `DS-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${String(c.result.maturity.sumAssured / 1000).padStart(4, '0')}`
+  // File names must stay ASCII: Chromium saves a non-ASCII name as "download" with no extension.
   const pdfName = () => {
-    const name = c.state.customerName.trim().replace(/\s+/g, '-') || 'Customer'
-    return `${t('pdf.filename')}-${c.result.plan.name.en}-${name}.pdf`
+    const ascii = c.state.customerName
+      .normalize('NFKD')
+      .replace(/[^A-Za-z0-9 _-]/g, '')
+      .trim()
+      .replace(/\s+/g, '-')
+      .slice(0, 40)
+    return `${t('pdf.filename')}-${c.result.plan.name.en.replace(/[^A-Za-z0-9-]/g, '')}-${ascii || 'Customer'}.pdf`
   }
 
   const prepareSheet = useCallback(async (l: Lang) => {
@@ -200,7 +206,7 @@ export function App() {
             )}
 
             {/* Navigation: sticky above the bottom nav on mobile, inline on desktop */}
-            <div className="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 dark:border-slate-700 dark:bg-slate-900/95 md:dark:bg-transparent">
+            <div className="fixed inset-x-0 bottom-[var(--nav-h)] z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur md:static md:border-0 md:bg-transparent md:p-0 dark:border-slate-700 dark:bg-slate-900/95 md:dark:bg-transparent">
               <div className="container flex gap-2 md:px-0">
                 {stepIndex > 0 && (
                   <Button size="lg" variant="outline" className="text-base" onClick={prevStep}>

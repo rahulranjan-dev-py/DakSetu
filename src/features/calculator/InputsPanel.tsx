@@ -34,7 +34,9 @@ export function CustomerCard({ c, onNext }: { c: CalculatorController; onNext?: 
               id="customerName"
               value={state.customerName}
               placeholder={t('input.customerNamePh')}
-              onChange={(e) => set('customerName', e.target.value)}
+              onChange={(e) => set('customerName', e.target.value.slice(0, 60))}
+              onBlur={(e) => set('customerName', e.target.value.trim())}
+              maxLength={60}
               autoComplete="off"
               enterKeyHint="next"
               onKeyDown={(e) => {

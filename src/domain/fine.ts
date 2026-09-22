@@ -36,7 +36,11 @@ export interface FineResult {
  * consecutive missed instalments.
  */
 export function calculateFine(input: FineInput): FineResult {
-  const { premium, monthsOverdue, instalmentsDue, policyOverThreeYears } = input
+  const safe = (v: number) => (Number.isFinite(v) ? v : 0)
+  const premium = safe(input.premium)
+  const monthsOverdue = safe(input.monthsOverdue)
+  const instalmentsDue = safe(input.instalmentsDue)
+  const { policyOverThreeYears } = input
   const feePerInstalmentPerMonth = Math.ceil(Math.max(0, premium) / 100) * CONFIG.lateFee.ratePer100PerMonth
   const n = Math.max(0, Math.floor(instalmentsDue))
   const m = Math.max(0, Math.floor(monthsOverdue))

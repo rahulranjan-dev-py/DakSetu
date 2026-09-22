@@ -33,9 +33,10 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
 
   // Keep the sheet to one A4 page: first five years, every fifth year, payout years and the final year.
   const lastYear = result.years[result.years.length - 1]?.year ?? 0
-  const yearRows = result.years.filter(
-    (r) => r.year <= 5 || r.year % 5 === 0 || r.inflow > 0 || r.year === lastYear || r.year === result.premiumTerm,
-  )
+  const keyYear = (r: (typeof result.years)[number]) => r.inflow > 0 || r.year === lastYear || r.year === result.premiumTerm
+  const every5 = result.years.filter((r) => r.year <= 5 || r.year % 5 === 0 || keyYear(r))
+  // Long policies (whole life from a young age) would overflow the page: thin the table further.
+  const yearRows = every5.length > 13 ? result.years.filter((r) => r.year <= 3 || r.year % 10 === 0 || keyYear(r)) : every5
 
   const Row = ({ k, v, bold }: { k: string; v: string; bold?: boolean }) => (
     <tr className="border-b border-slate-100">
@@ -129,7 +130,10 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
               <Row k={t('result.saWords')} v={amountInWords(result.maturity.sumAssured, lang)} />
               <Row k={t('result.term')} v={`${result.term} ${t('common.years')}`} />
               <Row k={t('result.premiumTerm')} v={`${result.premiumTerm} ${t('common.years')}`} />
-              <Row k={t('result.maturityAge')} v={String(result.maturityAge)} />
+              <Row
+                k={plan.joint ? t('result.maturityAgeJoint', { eff: Math.round((result.input.age + (result.input.spouseAge ?? result.input.age)) / 2) }) : t('result.maturityAge')}
+                v={String(result.maturityAge)}
+              />
               <Row k={t('input.paymentMode')} v={modeLabel} />
               <Row k={t('result.bonusRate')} v={t('result.bonusRateValue', { n: result.bonus.rate })} />
               <Row k={t('invest.bonus')} v={formatINR(result.bonus.total)} />

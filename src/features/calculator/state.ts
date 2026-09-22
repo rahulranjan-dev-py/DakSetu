@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { PLAN_BY_ID, plansFor } from '@/domain/catalog.ts'
 import { ageFromDOB, parseISODate } from '@/domain/age.ts'
-import { calculate, defaultInputFor, type CalcInput, type CalcResult } from '@/domain/engine.ts'
+import { calculate, defaultInputFor, jointTermRange, type CalcInput, type CalcResult } from '@/domain/engine.ts'
+import { sanitizeState } from './sanitize.ts'
 import type { PaymentMode, PlanId, Product } from '@/domain/types.ts'
 import { useLocalStorage } from '@/hooks/useLocalStorage.ts'
 
@@ -65,14 +66,23 @@ export interface CalculatorController {
   result: CalcResult
 }
 
+/** Joint life: keep the term inside the range Dak Sewa allows for the two ages (maturity 35–60). */
+function clampJointTerm(s: CalculatorState): CalculatorState {
+  if (!PLAN_BY_ID[s.planId].joint) return s
+  const { min, max } = jointTermRange(s.completedAge, s.spouseCompletedAge)
+  if (min > max) return s
+  const term = Math.min(max, Math.max(min, s.term))
+  return term === s.term ? s : { ...s, term }
+}
+
 export function useCalculator(): CalculatorController {
   const [persisted, setPersisted] = useLocalStorage<CalculatorState>('postal-mitra:calc', INITIAL)
-  const [state, setState] = useState<CalculatorState>({ ...INITIAL, ...persisted })
+  const [state, setState] = useState<CalculatorState>(() => clampJointTerm(sanitizeState(persisted, INITIAL)))
 
   const commit = useCallback(
     (updater: (prev: CalculatorState) => CalculatorState) => {
       setState((prev) => {
-        const next = updater(prev)
+        const next = clampJointTerm(updater(prev))
         setPersisted(next)
         return next
       })

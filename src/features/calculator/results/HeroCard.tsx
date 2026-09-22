@@ -131,7 +131,10 @@ export function HeroCard({ result }: { result: CalcResult }) {
           )}
           <span>·</span>
           <span>
-            {t('result.maturityAge')}: {result.maturityAge}
+            {result.plan.joint
+              ? t('result.maturityAgeJoint', { eff: Math.round((result.input.age + (result.input.spouseAge ?? result.input.age)) / 2) })
+              : t('result.maturityAge')}
+            : {result.maturityAge}
           </span>
         </div>
       </div>
