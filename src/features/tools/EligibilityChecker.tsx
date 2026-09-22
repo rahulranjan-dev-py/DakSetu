@@ -96,8 +96,9 @@ export function EligibilityChecker({ onOpenCalculator }: { onOpenCalculator: (p:
             />
           </div>
           <div>
-            <Label>{t('elig.occupation')}</Label>
+            <Label htmlFor="elig-occupation">{t('elig.occupation')}</Label>
             <Select
+              id="elig-occupation"
               value={occupation}
               onValueChange={(v) => setOccupation(v as Occupation)}
               options={OCCUPATIONS.map((o) => ({ value: o, label: t(`occ.${o}`) }))}

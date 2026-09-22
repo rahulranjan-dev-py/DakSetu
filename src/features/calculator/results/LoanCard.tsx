@@ -63,7 +63,7 @@ export function LoanCard({ result }: { result: CalcResult }) {
             ))}
           </tbody>
         </table>
-        <p className="mt-2 text-[11px] text-slate-400 dark:text-slate-500">
+        <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
           {loanAllowed ? `${t('loan.interest', { pct: CONFIG.loan.interestRate * 100 })} · ` : ''}
           {t('loan.note')}
         </p>

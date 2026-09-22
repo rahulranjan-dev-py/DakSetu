@@ -193,6 +193,7 @@ export const hi: Record<TranslationKey, string> = {
   'share.noNumber': 'सीधे भेजने के लिए ग्राहक का WhatsApp मोबाइल नंबर (फ़ॉर्म का चरण 2) भरें।',
   'share.dualApp': 'क्लोन / डुअल WhatsApp? PDF सेव करें और चैट खोलें',
   'share.dualSteps': 'PDF आपके Downloads में "{file}" नाम से सेव हो गया। WhatsApp चैट में अटैच (📎) → Document → Downloads में जाकर वह फ़ाइल चुनें।',
+  'share.preview': 'WhatsApp संदेश पूर्वावलोकन',
   'share.title': 'पिच टूल्स',
   'share.whatsapp': 'WhatsApp टेक्स्ट',
   'share.whatsappPdf': 'WhatsApp PDF',

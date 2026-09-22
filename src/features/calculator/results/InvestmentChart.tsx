@@ -126,7 +126,7 @@ export function InvestmentChart({ result }: { result: CalcResult }) {
           <div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400">{t('invest.gain')}</div>
             <div className="tabular text-sm font-bold text-emerald-700 dark:text-emerald-300">{formatINR(result.maturity.netGain)}</div>
-            <div className="text-[10px] text-slate-400 dark:text-slate-500">{t('invest.times', { n: multiple.toFixed(2) })}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400">{t('invest.times', { n: multiple.toFixed(2) })}</div>
           </div>
           <div>
             <div className="text-[11px] text-slate-500 dark:text-slate-400">{t('invest.roi')}</div>

@@ -191,6 +191,7 @@ export const en = {
   'share.noNumber': 'Add the customer\'s WhatsApp mobile number (step 2 of the form) to send directly to them.',
   'share.dualApp': 'Using a cloned / dual WhatsApp? Save PDF & open chat',
   'share.dualSteps': 'PDF saved to your Downloads as "{file}". In the WhatsApp chat tap the attach (📎) icon → Document → Downloads and pick that file.',
+  'share.preview': 'WhatsApp message preview',
   'share.title': 'Pitch tools',
   'share.whatsapp': 'WhatsApp text',
   'share.whatsappPdf': 'WhatsApp PDF',

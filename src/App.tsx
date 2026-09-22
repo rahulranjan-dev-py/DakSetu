@@ -143,7 +143,7 @@ export function App() {
                           ? 'border-postal-600 bg-postal-50 text-postal-700 dark:bg-postal-950/40 dark:text-postal-300'
                           : state === 'done'
                             ? 'border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200'
-                            : 'border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500',
+                            : 'border-slate-200 bg-white text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400',
                       )}
                     >
                       <span
@@ -186,7 +186,7 @@ export function App() {
                         <span className="min-w-0">
                           <span className={cn('block text-base font-extrabold leading-tight', active ? 'text-postal-700 dark:text-postal-300' : 'text-slate-700 dark:text-slate-300')}>{t(`product.${p}`)}</span>
                           <span className="block truncate text-[11px] leading-tight text-slate-500 dark:text-slate-400">{t(`product.${p}.full`)}</span>
-                          <span className="hidden text-[10px] text-slate-400 sm:block">{t(`product.${p}.hint`)}</span>
+                          <span className="hidden text-[10px] text-slate-500 sm:block dark:text-slate-400">{t(`product.${p}.hint`)}</span>
                         </span>
                       </button>
                     )
@@ -270,10 +270,10 @@ export function App() {
         {screen === 'eligibility' && <EligibilityChecker onOpenCalculator={openCalculator} />}
       </main>
 
-      <footer className="container mt-8 space-y-1 text-center text-[11px] text-slate-400">
+      <footer className="container mt-8 space-y-1 text-center text-[11px] text-slate-500 dark:text-slate-400">
         <p>{t('app.tagline')}</p>
         <p>
-          {t('app.developedBy')}: <span className="font-semibold text-slate-500">{t('app.developer')}</span>
+          {t('app.developedBy')}: <span className="font-semibold text-slate-500 dark:text-slate-400">{t('app.developer')}</span>
         </p>
       </footer>
 

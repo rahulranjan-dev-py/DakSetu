@@ -30,7 +30,7 @@ export function UnderwritingCard({ result }: { result: CalcResult }) {
           </span>
         </div>
         <p>{t('uw.tax')}</p>
-        <p className="text-[11px] text-slate-400 dark:text-slate-500">{t('uw.income')}</p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400">{t('uw.income')}</p>
       </CardContent>
     </Card>
   )

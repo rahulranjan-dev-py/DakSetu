@@ -190,7 +190,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
           <div className="rounded-lg bg-slate-50 p-2">
             <div className="text-[10px] text-slate-500">{t('invest.pay')}</div>
             <div className="text-sm font-bold tabular">{formatINR(result.totals.outgo)}</div>
-            <div className="text-[9px] text-slate-400">
+            <div className="text-[9px] text-slate-500">
               {gstApplies
                 ? `${t('invest.premiums')} ${formatINR(result.totals.basePremiums)} + ${t('invest.gst')} ${formatINR(result.totals.gst)}`
                 : `${result.premiumTerm} ${t('common.years')} · GST NIL`}
@@ -199,19 +199,19 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
           <div className="rounded-lg bg-slate-50 p-2">
             <div className="text-[10px] text-slate-500">{t('invest.get')}</div>
             <div className="text-sm font-bold tabular">{formatINR(result.maturity.totalBenefit)}</div>
-            <div className="text-[9px] text-slate-400">
+            <div className="text-[9px] text-slate-500">
               {t('invest.sa')} + {t('invest.bonus')}
             </div>
           </div>
           <div className="rounded-lg bg-slate-50 p-2">
             <div className="text-[10px] text-slate-500">{t('invest.gain')}</div>
             <div className="text-sm font-bold tabular text-emerald-700">{formatINR(result.maturity.netGain)}</div>
-            <div className="text-[9px] text-slate-400">{t('invest.roi')} {formatPct(result.returns.roi, 0)}</div>
+            <div className="text-[9px] text-slate-500">{t('invest.roi')} {formatPct(result.returns.roi, 0)}</div>
           </div>
           <div className="rounded-lg bg-slate-50 p-2">
             <div className="text-[10px] text-slate-500">{t('protection.title')}</div>
             <div className="text-sm font-bold tabular">{formatINR(result.maturity.sumAssured)}+</div>
-            <div className="text-[9px] text-slate-400">{t('protection.today')}</div>
+            <div className="text-[9px] text-slate-500">{t('protection.today')}</div>
           </div>
         </div>
         <ul className="mt-2 grid grid-cols-2 gap-x-6 gap-y-0.5 text-[11px]">
@@ -277,7 +277,7 @@ export const QuoteSheet = forwardRef<HTMLDivElement, Props>(function QuoteSheet(
         <span className="font-semibold">{t('disclaimer.title')}: </span>
         {t('disclaimer.body', { date: RATE_TABLE_META.generatedAt })}
       </p>
-      <p className="mt-1 text-center text-[9px] text-slate-400">
+      <p className="mt-1 text-center text-[9px] text-slate-500">
         {t('pdf.generatedBy')} · {t('app.developedBy')}: {t('app.developer')}
       </p>
     </div>

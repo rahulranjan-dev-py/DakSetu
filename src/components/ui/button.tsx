@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-postal-600 text-white shadow-sm hover:bg-postal-700',
         amber: 'amber-gradient text-slate-900 shadow-sm hover:brightness-105',
-        whatsapp: 'bg-[#25D366] text-white shadow-sm hover:bg-[#1ebe5b]',
+        whatsapp: 'bg-[#075E54] text-white shadow-sm hover:bg-[#064e46]',
         outline: 'border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800',
         secondary: 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 hover:bg-slate-200 dark:hover:bg-slate-700',
         ghost: 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300',
@@ -18,7 +18,7 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-11 px-4 py-2',
-        sm: 'h-9 rounded-lg px-3 text-xs',
+        sm: 'h-10 rounded-lg px-3 text-xs',
         lg: 'h-12 rounded-xl px-6 text-base',
         icon: 'h-10 w-10',
       },
