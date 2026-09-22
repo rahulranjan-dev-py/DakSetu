@@ -127,7 +127,7 @@ export function ShareBar({
               { value: 'en', label: 'English' },
             ]}
             columns={2}
-            className="gap-1 [&>button]:min-h-8 [&>button]:rounded-lg [&>button]:py-0.5 [&>button]:text-xs"
+            className="gap-1 [&>button]:min-h-10 [&>button]:rounded-lg [&>button]:py-0.5 [&>button]:text-xs"
           />
         </div>
       </CardHeader>
@@ -136,13 +136,13 @@ export function ShareBar({
           <span className="flex items-center gap-2">
             <MessageCircle /> {t('share.step1')}
           </span>
-          <span className="text-[11px] font-medium opacity-90">{hasNumber ? t('share.toNumber', { n: `+91 ${prettyNumber}` }) : t('share.whatsapp')}</span>
+          <span className="text-[11px] font-medium">{hasNumber ? t('share.toNumber', { n: `+91 ${prettyNumber}` }) : t('share.whatsapp')}</span>
         </Button>
         <Button variant="whatsapp" size="lg" onClick={sharePdf} disabled={disabled || busy !== null} className="col-span-2 h-auto min-h-12 flex-col gap-0 py-2 sm:col-span-1">
           <span className="flex items-center gap-2">
             {busy === 'share' ? <Loader2 className="animate-spin" /> : <Paperclip />} {busy === 'share' ? t('share.generating') : t('share.step2')}
           </span>
-          <span className="text-[11px] font-medium opacity-90">{t('share.whatsappPdf')}</span>
+          <span className="text-[11px] font-medium">{t('share.whatsappPdf')}</span>
         </Button>
         <p className="col-span-2 text-[11px] leading-snug text-slate-600 dark:text-slate-300">{hasNumber ? t('share.howTo') : t('share.noNumber')}</p>
         <Button variant="outline" size="sm" onClick={dualApp} disabled={disabled || busy !== null} className="col-span-2 h-auto min-h-9 whitespace-normal py-1.5 text-xs">
@@ -155,7 +155,7 @@ export function ShareBar({
           {copied ? <Check className="text-emerald-600" /> : <Copy />} {copied ? t('share.copied') : t('share.copy')}
         </Button>
         {note && <p className="col-span-2 text-xs text-slate-600 dark:text-slate-300">{note}</p>}
-        <pre className="col-span-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-xl bg-white/80 p-3 text-[11px] leading-relaxed text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
+        <pre tabIndex={0} aria-label={t('share.preview')} className="col-span-2 max-h-40 overflow-auto whitespace-pre-wrap rounded-xl bg-white/80 p-3 text-[11px] leading-relaxed text-slate-600 dark:bg-slate-900/60 dark:text-slate-300">
           {message}
         </pre>
       </CardContent>

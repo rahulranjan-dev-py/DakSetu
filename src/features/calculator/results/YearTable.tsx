@@ -25,7 +25,7 @@ export function YearTable({ result, compact = true }: { result: CalcResult; comp
           </Button>
         )}
       </CardHeader>
-      <CardContent className="w-full min-w-0 overflow-x-auto px-0 pb-2">
+      <CardContent tabIndex={0} aria-label={t('table.title')} className="w-full min-w-0 overflow-x-auto px-0 pb-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
         <table className="w-full min-w-[520px] text-xs">
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-800/60 text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">

@@ -69,14 +69,14 @@ export function PlanPicker({
                 <div className={cn('text-sm font-bold leading-tight', active ? 'text-postal-800 dark:text-postal-200' : 'text-slate-900 dark:text-slate-100')}>
                   {l(plan.name)}
                 </div>
-                <div className="text-[11px] leading-tight text-slate-500 dark:text-slate-400">{l(plan.tagline)}</div>
+                <div className="text-[11px] leading-tight text-slate-600 dark:text-slate-300">{l(plan.tagline)}</div>
               </div>
-              <div className="mt-auto flex flex-wrap gap-x-2 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+              <div className="mt-auto flex flex-wrap gap-x-2 text-[11px] font-medium text-slate-600 dark:text-slate-300">
                 <span>{ageLabel}</span>
                 <span>·</span>
                 <span>{t('plan.bonus', { n: plan.bonusRate })}</span>
               </div>
-              <div className="text-[10px] text-slate-400 dark:text-slate-500">
+              <div className="text-[11px] text-slate-600 dark:text-slate-300">
                 {t('plan.sa', { min: formatShortINR(plan.minSA, lang), max: formatShortINR(plan.maxSA, lang) })}
               </div>
             </button>

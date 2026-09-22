@@ -32,7 +32,7 @@ export function BottomNav({
               onClick={() => (id === 'agent' ? onOpenAgent() : onChange(id))}
               className={cn(
                 'flex flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-colors',
-                active ? 'text-postal-600 dark:text-postal-300' : 'text-slate-500 dark:text-slate-400',
+                active ? 'text-postal-600 dark:text-postal-300' : 'text-slate-600 dark:text-slate-400',
               )}
               aria-current={active ? 'page' : undefined}
             >

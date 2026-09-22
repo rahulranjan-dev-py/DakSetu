@@ -39,7 +39,7 @@ export function Segmented<T extends string | number>({ value, onChange, options,
             )}
           >
             <span className="tabular">{o.label}</span>
-            {o.hint && <span className={cn('text-[10px] font-medium', active ? 'text-postal-600 dark:text-postal-300' : 'text-slate-400 dark:text-slate-500')}>{o.hint}</span>}
+            {o.hint && <span className={cn('text-[10px] font-medium', active ? 'text-postal-600 dark:text-postal-300' : 'text-slate-500 dark:text-slate-400')}>{o.hint}</span>}
           </button>
         )
       })}

@@ -78,7 +78,7 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
             />
           )}
           {!compact && (
-            <p className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+            <p className="mt-1 flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400">
               <Info size={12} />
               {state.ageMode === 'dob' ? (c.dobValid ? t('input.anb', { n: c.anb }) : t('input.dob')) : t('input.anbHint')}
             </p>
@@ -108,7 +108,7 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
               type="button"
               onClick={() => set('sumAssured', v)}
               className={cn(
-                'shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors',
+                'min-h-10 shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition-colors',
                 state.sumAssured === v
                   ? 'border-postal-600 bg-postal-600 text-white'
                   : 'border-slate-200 bg-white text-slate-700 hover:border-postal-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
@@ -132,7 +132,7 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
           onBlur={saDraft.onBlur}
           onFocus={saDraft.onFocus}
         />
-        <div className="mt-1 flex justify-between text-[11px] text-slate-400">
+        <div className="mt-1 flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
           <span>{formatINR(plan.minSA)}</span>
           <span>{formatINR(plan.maxSA)}</span>
         </div>
@@ -199,8 +199,9 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
       {plan.kind === 'CWLA' && plan.conversionWindow && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <Label>{t('input.conversion')}</Label>
+            <Label htmlFor="conversionYear">{t('input.conversion')}</Label>
             <Select
+              id="conversionYear"
               value={state.conversionYear}
               onValueChange={(v) => set('conversionYear', Number(v))}
               options={[
@@ -214,8 +215,9 @@ export function PlanControls({ c, compact = false }: { c: CalculatorController; 
           </div>
           {state.conversionYear > 0 && (
             <div>
-              <Label>{t('input.conversionMaturityAge')}</Label>
+              <Label htmlFor="conversionMaturityAge">{t('input.conversionMaturityAge')}</Label>
               <Select
+                id="conversionMaturityAge"
                 value={state.conversionMaturityAge}
                 onValueChange={(v) => set('conversionMaturityAge', Number(v))}
                 options={[50, 55, 58, 60].map((v) => ({ value: v, label: String(v) }))}
