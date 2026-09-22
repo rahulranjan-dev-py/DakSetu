@@ -58,6 +58,12 @@ export function anchoredRate(
   const series = officialSeries(product, kind, key)
   if (!series) return undefined
   if (series[String(age)] !== undefined) return series[String(age)]
+  // Between two quoted ages that carry the same official rate the model's own
+  // curvature would only add a ±0.007 wobble: snap to the quoted value instead.
+  const quoted = Object.keys(series).map(Number).sort((a, b) => a - b)
+  const below = quoted.filter((a) => a < age).pop()
+  const above = quoted.find((a) => a > age)
+  if (below !== undefined && above !== undefined && series[String(below)] === series[String(above)]) return series[String(below)]
   const ratios: Record<number, number> = {}
   for (const a of Object.keys(series)) {
     const m = model(+a)
